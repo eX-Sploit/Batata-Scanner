@@ -7,8 +7,10 @@ local ADDON,
 local Panel = {}
 NS.WelcomePanel = Panel -- Exposes the panel so UI.lua can build it and read its icon.
 
-local Widgets = NS.Widgets -- Shared widget factories, colors, and footer metrics.
-Panel.icon = "Interface\\Icons\\INV_Misc_Spyglass_03" -- Welcome tab/portrait icon and Overview logo.
+local Widgets    = NS.Widgets -- Shared widget factories, colors, and footer metrics.
+local LOGO_SIZE  = 96 -- Pixel size of the primary Welcome-page image.
+local LOGO_GAP   = 16 -- Space between the Welcome image and heading text.
+Panel.icon = NS.iconTexture -- Welcome tab/portrait icon and Overview logo.
 
 -- Section definitions: tab label, layout style, heading text, and cards for each section.
 local CONTENT = {
@@ -234,7 +236,7 @@ function Panel:Build(root, mainFrame)
         if pageContent.logo then
             page.logo = page.header:CreateTexture(nil, "ARTWORK")
             page.logo:SetTexture(self.icon)
-            page.logo:SetSize(48, 48)
+            page.logo:SetSize(LOGO_SIZE, LOGO_SIZE)
             page.logo:SetPoint("TOPLEFT")
         end
         page.title     = Label(page.header, pageContent.title, "GameFontNormalLarge")
@@ -264,7 +266,7 @@ end
 -- @param page Page record containing header widgets.
 -- @param width Width available for the header content.
 local function LayoutHeader(page, width)
-    local left       = page.logo and 60 or 0
+    local left       = page.logo and LOGO_SIZE + LOGO_GAP or 0
     local textWidth  = math.max(1, width - left)
     local offset     = 0
     page.header:SetWidth(width)
@@ -276,7 +278,7 @@ local function LayoutHeader(page, width)
     page.subtitle:ClearAllPoints()
     page.subtitle:SetPoint("TOPLEFT", left, -offset)
     offset = offset + page.subtitle:GetStringHeight()
-    local height = math.max(page.logo and 48 or 0, offset)
+    local height = math.max(page.logo and LOGO_SIZE or 0, offset)
     page.header:SetHeight(height)
     return height + 10
 end

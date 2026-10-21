@@ -10,10 +10,11 @@ local function ReadMetadata(field)
         or (GetAddOnMetadata and GetAddOnMetadata(ADDON, field))
 end
 
-NS.name        = ADDON -- Addon folder name shared with other modules.
-NS.ready       = false -- True once saved data and faction context are initialized.
-NS.version     = ReadMetadata("Version") -- Release version from the TOC.
-NS.apiVersion  = tonumber(ReadMetadata("X-API-Version")) -- Consumer API version from the TOC.
+NS.name         = ADDON -- Addon folder name shared with other modules.
+NS.ready        = false -- True once saved data and faction context are initialized.
+NS.version      = ReadMetadata("Version") -- Release version from the TOC.
+NS.apiVersion   = tonumber(ReadMetadata("X-API-Version")) -- Consumer API version from the TOC.
+NS.iconTexture  = "Interface\\AddOns\\" .. ADDON .. "\\Assets\\batata-scanner-icon.png" -- Shared addon brand artwork.
 
 NS.FactionRaces = {
     Alliance = {

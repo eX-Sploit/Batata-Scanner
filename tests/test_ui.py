@@ -92,6 +92,9 @@ class UIContracts(unittest.TestCase):
             NS.UI:Show()
             local welcome=NS.WelcomePanel
             assert(welcome.root:IsVisible() and NS.UI.pageTitle:GetText()=="Welcome")
+            local welcomeLogo=welcome.pages[1].logo
+            assert(welcome.icon=="Interface\\AddOns\\Batata Scanner\\Assets\\batata-scanner-icon.png")
+            assert(welcomeLogo.texture==welcome.icon and welcomeLogo:GetWidth()==96 and welcomeLogo:GetHeight()==96)
             assert(NS.UI.pageTitle.properties.SetJustifyH[1]=="LEFT")
             assert(#welcome.navigation.links==2 and welcome.navigation.selected==1)
             assert(welcome.navigation.links[1]:GetText()=="Overview")
@@ -125,6 +128,7 @@ class UIContracts(unittest.TestCase):
         self.check(r'''
             local button=Batata_Scanner_MinimapButton
             assert(button and button:GetParent()==Minimap and NS.db.minimap.angle==225)
+            assert(NS.MinimapButton.iconTexture.texture==NS.iconTexture)
             assert(Batata_Scanner_MainFrame==nil)
             ClickWidget(button)
             assert(NS.UI.frame:IsShown())
