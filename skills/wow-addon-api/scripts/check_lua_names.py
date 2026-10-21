@@ -5,19 +5,21 @@ import sys
 from align_lua import parse, walk
 
 
-ROOT = Path(__file__).resolve().parents[3]
-PUBLIC_NAMES = {'NS', 'UI', 'ADDON'}
-OPAQUE_NAMES = {
+ROOT = Path(__file__).resolve().parents[3]  # Addon root used when no source paths are passed.
+PUBLIC_NAMES = {'NS', 'UI', 'ADDON'}  # Established namespace names exempt from the opaque-name rule.
+OPAQUE_NAMES = {  # Short aliases rejected even when their character count exceeds the generic limit.
     'src', 'dst', 'arr', 'opts', 'arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6',
     'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'minL', 'maxL', 'tmp', 'temp', 'foo', 'bar',
 }
 
 
 # Collect local declarations, parameters, and loop bindings with their source byte offsets.
+# @param source Lua source bytes to audit.
 def bindings(source):
     declarations = {}
 
     # Record an identifier binding once, keyed by its starting byte offset.
+    # @param identifier Parsed syntax node for the binding, if present.
     def remember(identifier):
         if identifier is not None and identifier.type == 'identifier':
             declarations[identifier.start_byte] = source[identifier.start_byte:identifier.end_byte].decode('utf-8')
@@ -45,6 +47,7 @@ def bindings(source):
 
 
 # Return line numbers and names for short or opaque bindings outside the public-name allowlist.
+# @param source Lua source bytes to audit.
 def violations(source):
     return [(source.count(b'\n', 0, offset) + 1, name) for offset, name in bindings(source)
             if name not in PUBLIC_NAMES and (len(name) <= 2 or name in OPAQUE_NAMES)]

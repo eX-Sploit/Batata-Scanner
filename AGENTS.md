@@ -31,7 +31,7 @@ Before Lua edits, read [formatting conventions](skills/wow-addon-api/references/
 
 ## Release versioning
 
-`## Version` in [BatataScanner.toc](BatataScanner.toc) is the only release version source. Runtime displays and the API must read metadata. Initial release is 1.0.0. Every later bugfix or feature requires one version bump before completion: patch for compatible fixes; minor with patch reset for compatible features; major with minor/patch reset when continued operation or compatibility requires consumers to upgrade. Apply the highest required bump once per completed change.
+`## Version` in [BatataScanner.toc](BatataScanner.toc) is the only release version source. Runtime displays and the API must read metadata. Initial release is 1.0.0. Every later bugfix or feature requires one version bump before completion: patch for compatible fixes; minor with patch reset for compatible features; major with minor/patch reset when continued operation or compatibility requires consumers to upgrade. Apply the highest required bump once per completed change. `## X-API-Version` in the TOC is the only consumer API version source; increment it when the public API contract changes incompatibly.
 
 ## Validation
 

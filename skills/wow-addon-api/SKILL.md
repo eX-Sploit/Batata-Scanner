@@ -13,7 +13,7 @@ Use this baseline for all BatataScanner Lua work, then select the focused UI, so
 
 ## Project conventions
 
-- Follow [release versioning](../../AGENTS.md#release-versioning). Keep `## Version` in the TOC as the single release source; never hardcode it in Lua.
+- Follow [release versioning](../../AGENTS.md#release-versioning). Keep `## Version` and `## X-API-Version` in the TOC as the single release and API version sources; never hardcode them in Lua.
 - Read [Lua formatting](references/lua-formatting.md) and [.stylua.toml](../../.stylua.toml). Use descriptive bindings, Lua 5.1, four spaces, CRLF, multiline bodies, and aligned related assignments. Preserve multiple-return semantics when laying out declarations.
 - Keep the shared namespace supplied by `...` local and modules internal. Expose only the documented read-only `BatataScanner` facade, SavedVariables, named frames, and slash registration globals needed by the client. Ordinary Lua `require` does not replace TOC loading.
 - Keep persisted readiness separate from world/context readiness. Preserve false, zero, and empty defaults. Do not replace `BatataScanner_DB` or import another addon's database.

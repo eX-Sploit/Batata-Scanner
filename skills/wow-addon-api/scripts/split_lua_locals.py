@@ -6,10 +6,11 @@ import sys
 from align_lua import align_source, parse, walk
 
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[3]  # Addon root used as the default declaration-check scope.
 
 
 # Yield local declarations containing multiple names together with their initializer expressions.
+# @param source Lua source bytes to inspect.
 def declarations(source):
     for node in walk(parse(source)):
         if node.type != 'variable_declaration':
@@ -26,6 +27,7 @@ def declarations(source):
 
 
 # Locate declarations that place more than one local binding on the same line.
+# @param source Lua source bytes to validate.
 def violations(source):
     found = []
     for node, names, values in declarations(source):
@@ -40,11 +42,13 @@ def violations(source):
 
 
 # Collect meaningful token counts and ordered comments for declaration-rewrite equivalence checks.
+# @param source Lua source bytes whose tokens and comments should be collected.
 def contents(source):
     meaningful = []
     comments = []
 
     # Collect tokens and comments while excluding punctuation that declaration splitting may change.
+    # @param node Parsed Lua syntax node to traverse.
     def visit(node):
         if node.type in ('string', 'number', 'comment') or not node.children:
             token = source[node.start_byte:node.end_byte]
@@ -61,6 +65,8 @@ def contents(source):
 
 
 # Collect identifiers used by an initializer, excluding property names and named table keys.
+# @param source Lua source bytes containing the initializer.
+# @param expression Parsed initializer expression node.
 def initializer_references(source, expression):
     references = set()
     for node in walk(expression):
@@ -76,6 +82,10 @@ def initializer_references(source, expression):
 
 
 # Check whether independent local declarations preserve initializer scope and return-value semantics.
+# @param source Lua source bytes being transformed.
+# @param node Multi-name local declaration node.
+# @param names Parsed local identifiers in declaration order.
+# @param values Parsed initializer expressions, if present.
 def can_split(source, node, names, values):
     if any(child.type == 'comment' for child in walk(node)):
         return False
@@ -96,6 +106,12 @@ def can_split(source, node, names, values):
 
 
 # Render independent local declarations while preserving each original initializer expression.
+# @param source Original Lua source bytes.
+# @param node Declaration node being rewritten.
+# @param names Local identifier nodes to render separately.
+# @param values Matching initializer expression nodes, if present.
+# @param indentation Leading whitespace shared by the original statement.
+# @param newline Line-ending bytes preserved by the rewrite.
 def separate_declarations(source, node, names, values, indentation, newline):
     if values is None:
         return (newline + indentation).join(b'local ' + source[name.start_byte:name.end_byte] for name in names)
@@ -107,6 +123,11 @@ def separate_declarations(source, node, names, values, indentation, newline):
 
 
 # Put shared declaration names on separate lines without splitting their initializer.
+# @param source Original Lua source bytes.
+# @param node Shared declaration node to reflow.
+# @param names Local identifiers to place on separate lines.
+# @param newline Line-ending bytes preserved by the rewrite.
+# @param indentation Leading whitespace shared by the original statement.
 def shared_declaration(source, node, names, newline, indentation):
     replacement = source[node.start_byte:node.end_byte]
     for name in reversed(names[1:]):
@@ -120,6 +141,8 @@ def shared_declaration(source, node, names, newline, indentation):
 
 
 # Rewrite multi-name locals safely, checking token preservation and optional semantic equivalence.
+# @param source Lua source bytes to transform.
+# @param equivalent Optional comparator that checks executable equivalence between versions.
 def split_source(source, equivalent=None):
     original = source
     newline = b'\r\n' if b'\r\n' in source else b'\n'

@@ -5,7 +5,7 @@ description: 'Implement or debug BatataScanner frames, scan controls, census tab
 
 # WoW Forever scanner UI
 
-Read the [API baseline](../wow-addon-api/SKILL.md), [window shell](../../UI.lua), [shared widgets](../../Widgets.lua), and the affected [Scanner](../../ScannerPanel.lua) or [Census](../../CensusPanel.lua) panel before editing presentation. Consult the [focused evidence](../../docs/wow-forever-api/API-REFERENCE.md) for API details. The baseline is source **1.60.1 (70374)**, not an in-game test. Preserve GuildHQ's right-side icon navigation, combined scanner browser/details, compact playback controls, settings dialog, Census subsections, and native scrolling tables.
+Read the [API baseline](../wow-addon-api/SKILL.md), [window shell](../../UI/UI.lua), [shared widgets](../../UI/Widgets.lua), and the affected [Scanner](../../UI/Panels/ScannerPanel.lua) or [Census](../../UI/Panels/CensusPanel.lua) panel before editing presentation. Consult the [focused evidence](../../docs/wow-forever-api/API-REFERENCE.md) for API details. The baseline is source **1.60.1 (70374)**, not an in-game test. Preserve GuildHQ's right-side icon navigation, combined scanner browser/details, compact playback controls, settings dialog, Census subsections, and native scrolling tables.
 
 ## Compose and bind
 
@@ -19,7 +19,7 @@ Read the [API baseline](../wow-addon-api/SKILL.md), [window shell](../../UI.lua)
 
 Keep row reuse complete: rebind text, color, record, tooltip, hover, selection, enabled state, visibility, and callbacks. Alternate row shading by absolute record index. Preserve bounded visible-row rendering, stable sort ties, scroll bounds, and filters. Do not add a second unbounded UI copy of the database.
 
-Bind scan controls to the existing state machine. A click dispatches one permitted query; timers only update local status. Make readiness, cooldown, waiting, paused, incomplete, conflict, and unavailable states understandable. A progress bar cannot establish authoritative population coverage. Keep passive collection and optional world-click dispatch clearly distinct; world-click dispatch defaults off.
+Bind scan controls to the existing state machine. A click dispatches one permitted query; timers only update local status. Make readiness, cooldown, waiting, paused, incomplete, conflict, and unavailable states understandable. A progress bar cannot establish authoritative population coverage. Keep passive collection and world-click dispatch clearly distinct; both are always on, and world clicks dispatch only while a sweep is running and unpaused.
 
 ## Restricted values and settings
 

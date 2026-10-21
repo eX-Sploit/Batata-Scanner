@@ -5,7 +5,7 @@ description: 'Develop and diagnose BatataScanner startup, SavedVariables, depend
 
 # WoW Forever addon workflow
 
-Read the [API baseline](../wow-addon-api/SKILL.md), actual [TOC](../../BatataScanner.toc), [Core.lua](../../Core.lua), and [evidence boundaries](../../docs/wow-forever-api/README.md). Source **1.60.1 (70374)** collected **2026-10-14** is not a current-client measurement.
+Read the [API baseline](../wow-addon-api/SKILL.md), actual [TOC](../../BatataScanner.toc), [Core.lua](../../Core/Core.lua), and [evidence boundaries](../../docs/wow-forever-api/README.md). Source **1.60.1 (70374)** collected **2026-10-14** is not a current-client measurement.
 
 ## Loading and persistence
 

@@ -9,12 +9,14 @@ from tree_sitter import Language, Parser
 import tree_sitter_lua
 
 
-PARSER = Parser(Language(tree_sitter_lua.language()))
-ROOT = Path(__file__).resolve().parents[3]
+PARSER = Parser(Language(tree_sitter_lua.language()))  # Shared Tree-sitter parser for Lua source bytes.
+ROOT = Path(__file__).resolve().parents[3]  # Addon root used as the default formatting scope.
 
 
 @dataclass
 class Assignment:
+    """Stores source spans and alignment measurements for one Lua assignment."""
+
     first_line: int
     last_line: int
     indentation: bytes
@@ -30,6 +32,7 @@ class Assignment:
 
 
 # Parse Lua bytes and reject sources containing syntax errors.
+# @param source Lua source bytes to parse.
 def parse(source):
     root = PARSER.parse(source).root_node
     if root.has_error:
@@ -38,6 +41,7 @@ def parse(source):
 
 
 # Yield each named syntax node in depth-first order.
+# @param node Parsed tree node whose descendants should be visited.
 def walk(node):
     yield node
     for child in node.named_children:
@@ -45,6 +49,7 @@ def walk(node):
 
 
 # Collect exact Lua token, literal, and comment bytes for formatting equivalence checks.
+# @param source Lua source bytes to fingerprint.
 def fingerprint(source):
     pieces = []
 
@@ -61,6 +66,8 @@ def fingerprint(source):
 
 
 # Align consecutive assignment groups within the column limit while preserving all Lua tokens.
+# @param source Lua source bytes to format.
+# @param column_width Maximum code width before an alignment group is split.
 def align_source(source, column_width=120):
     root = parse(source)
     line_starts = [0]
@@ -69,10 +76,12 @@ def align_source(source, column_width=120):
     comments_by_line = {}
 
     # Map a source byte offset to its zero-based line index.
+    # @param offset Byte position within source.
     def line_number(offset):
         return bisect_right(line_starts, offset) - 1
 
     # Measure decoded text width with tabs expanded to four spaces.
+    # @param fragment Source bytes whose display width should be measured.
     def width(fragment):
         return len(fragment.decode('utf-8').expandtabs(4))
 
@@ -80,6 +89,8 @@ def align_source(source, column_width=120):
         comments_by_line.setdefault(line_number(comment.start_byte), []).append(comment)
 
     # Extract alignment offsets and widths for an eligible single-line assignment prefix.
+    # @param node Parsed assignment or declaration node.
+    # @param family Assignment grouping kind used to avoid mixing fields and statements.
     def assignment(node, family):
         first_line = line_number(node.start_byte)
         line_start = line_starts[first_line]
@@ -116,6 +127,7 @@ def align_source(source, column_width=120):
     edits = []
 
     # Generate whitespace edits for an assignment group, splitting groups that exceed the column limit.
+    # @param group Consecutive compatible assignments to align.
     def finish(group):
         if len(group) < 2:
             return
