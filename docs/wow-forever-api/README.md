@@ -1,8 +1,8 @@
 # Focused WoW Forever API evidence
 
-This is a deliberately small migration from GuildHQ's research, collected **2026-10-14** against Blizzard-authored UI source mirrored at commit **`735496de78ebd30ce816a0637982c556987f258c`**, labeled **1.60.1 (70374)**. It covers BatataScanner's scanning, identity, lifecycle, UI, and access-check boundaries. It is not a full copy of GuildHQ's generated inventory or a runtime test of the installed client.
+This is a deliberately small migration from GuildHQ's research, collected **2026-10-14** against Blizzard-authored UI source mirrored at commit **`735496de78ebd30ce816a0637982c556987f258c`**, labeled **1.60.1 (70374)**. It covers Batata Scanner's scanning, identity, lifecycle, UI, and access-check boundaries. It is not a full copy of GuildHQ's generated inventory or a runtime test of the installed client.
 
-[BatataScanner.toc](../../BatataScanner.toc) declares Interface **16001**. `_classic_beta_` is an installation directory, not evidence that Classic Era API contracts apply. The pinned Camelot source sets `WOW_PROJECT_CAMELOT = 18`: [project constants](https://github.com/Gethe/wow-ui-source/blob/735496de78ebd30ce816a0637982c556987f258c/Interface/AddOns/Blizzard_ProjectConstants/Camelot/ProjectConstants.lua).
+[Batata Scanner.toc](../../Batata%20Scanner.toc) declares Interface **16001**. `_classic_beta_` is an installation directory, not evidence that Classic Era API contracts apply. The pinned Camelot source sets `WOW_PROJECT_CAMELOT = 18`: [project constants](https://github.com/Gethe/wow-ui-source/blob/735496de78ebd30ce816a0637982c556987f258c/Interface/AddOns/Blizzard_ProjectConstants/Camelot/ProjectConstants.lua).
 
 Read [API-REFERENCE.md](API-REFERENCE.md) for focused implementation notes. Search [api-symbols.jsonl](api-symbols.jsonl) by exact `lookup` to find the selected declaration, signature, metadata, and immutable source link:
 
@@ -29,4 +29,4 @@ This migration did not launch or instrument WoW. The source snapshot must not be
 
 Record actual `GetBuildInfo()` results, project/game type, locale, and relevant client state. Select a matching immutable source revision and inspect the actual generated declaration plus native Lua/XML caller and Camelot load manifest. Add only relevant records and source-backed notes. Keep declarations, historical reports, addon policy, and measured results explicitly distinct; do not replace the pin with a moving branch link.
 
-The parent source collection was GuildHQ `docs/wow-forever-api/`, particularly its research index, API reference, social integration, and development workflow. BatataScanner's [skills](../../skills/wow-addon-api/SKILL.md) and formatting helpers were adapted from that repository. The runtime addon is independent and neither imports nor writes GuildHQ data.
+The parent source collection was GuildHQ `docs/wow-forever-api/`, particularly its research index, API reference, social integration, and development workflow. Batata Scanner's [skills](../../skills/wow-addon-api/SKILL.md) and formatting helpers were adapted from that repository. The runtime addon is independent and neither imports nor writes GuildHQ data.

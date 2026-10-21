@@ -59,7 +59,7 @@ function IsInInstance() return instanceKind~="none",instanceKind end
 -- Returns the deterministic mock GetWhoRaceFilters result.
 function GetWhoRaceFilters() return { {name="Human", raceID=1}, {name="Dwarf",raceID=3} } end
 C_AddOns = {GetAddOnMetadata=function(addon, field)
-    assert(addon=="BatataScanner")
+    assert(addon=="Batata Scanner")
     return TOC_METADATA[field]
 end}
 DEFAULT_CHAT_FRAME = {AddMessage=function(self,message) chat[#chat+1]=message end}
@@ -252,7 +252,7 @@ class Harness:
             setup: Optional Lua source executed before addon modules load.
         """
         self.lua = LuaRuntime(unpack_returned_tuples=True)
-        manifest = (ROOT / "BatataScanner.toc").read_text(encoding="utf-8")
+        manifest = (ROOT / "Batata Scanner.toc").read_text(encoding="utf-8")
         metadata = dict(line[3:].split(":", 1) for line in manifest.splitlines()
                         if line.startswith("## ") and ":" in line)
         metadata = {field.strip(): value.strip() for field, value in metadata.items()}
@@ -270,10 +270,10 @@ class Harness:
         modules = modules or ("Core.lua", "Store.lua", "Scanner.lua", "Passive.lua", "API.lua")
         for filename in modules:
             path = module_paths[filename]
-            self.lua.execute('assert(loadstring(...))("BatataScanner",NS)',
+            self.lua.execute('assert(loadstring(...))("Batata Scanner",NS)',
                              path.read_text(encoding="utf-8-sig"))
         if initialize:
-            self.emit("ADDON_LOADED", "BatataScanner")
+            self.emit("ADDON_LOADED", "Batata Scanner")
             self.emit("PLAYER_LOGIN")
 
     def execute(self, code):

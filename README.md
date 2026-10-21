@@ -1,6 +1,6 @@
-# BatataScanner
+# Batata Scanner
 
-BatataScanner is a simple addon for WoW Forever that keeps track of players you see and helps you build a local player census.
+Batata Scanner is a simple addon for WoW Forever that keeps track of players you see and helps you build a local player census.
 
 Think of it like a personal notes board for the world around you: who you’ve seen, what class they are, their guild, their level, and when you last spotted them.
 
@@ -17,10 +17,10 @@ It is made for players who want a cleaner, easier way to track people nearby wit
 ## Install
 
 1. Put the addon in your WoW folder as:
-   `Interface/AddOns/BatataScanner`
+   `Interface/AddOns/Batata Scanner`
 2. Enable it in the addon list
 3. Reload the UI
-4. Open it with `/batatascanner`, `/bs`, or the minimap button
+4. Open it with `/batata-scanner`, `/bs`, or the minimap button
 
 You can drag the minimap button to a different spot if you want it easier to reach.
 
@@ -54,7 +54,7 @@ The scan controls let you sweep players in a controlled way. You can choose whic
 
 Accepted Who replies are stored immediately, but the Scanner table waits for its normal 30-second refresh interval, just like passive updates. Automatic searches wait at least 30 seconds after the previous search started, including after a manual search, and preserve your filters, sort, and scroll position. Search, filter, and sort actions still respond immediately, as do scan-status controls. If a search is already running, it finishes before a queued refresh starts. Reopening a dirty cached table respects any remaining refresh interval. An explicitly cancelled search stays cancelled until you submit another search. Invalid submissions cancel in-flight work and leave the last completed results visible until you submit valid input.
 
-Opening BatataScanner starts a background player search, even if you stay on Welcome or Census, so Scanner is ready when you open it. Search results refresh every 30 seconds while the window is open, including recency filters; closing the window stops these refreshes.
+Opening Batata Scanner starts a background player search, even if you stay on Welcome or Census, so Scanner is ready when you open it. Search results refresh every 30 seconds while the window is open, including recency filters; closing the window stops these refreshes.
 
 Large searches prepare their ordering and filter records in bounded steps across frames so they do not block the UI in one large sort.
 
@@ -112,7 +112,7 @@ Donut charts reuse unchanged slice artwork. Hovering repaints only the affected 
 
 ## How it works
 
-BatataScanner watches both:
+Batata Scanner watches both:
 
 - Direct scans you trigger in-game
 - Passive observations while you play (like nearby players you can read from units, party members, raid members, and similar sources)
@@ -148,7 +148,7 @@ History retention is account-wide and opt-in. Saving a finite period permanently
 
 ## Important notes
 
-- BatataScanner is for tracking and local census data.
+- Batata Scanner is for tracking and local census data.
 - It is not a recruitment or guild management tool.
 - It keeps its own local data and does not rely on GuildHQ data.
 - It is meant to work as a read-only helper for your own information and addon use.
@@ -161,18 +161,18 @@ Use it as a local player-tracking tool, not as a guarantee of live server-wide p
 
 ## For addon developers
 
-If you are building another addon and want to read BatataScanner’s data, see [docs/API.md](docs/API.md).
+If you are building another addon and want to read Batata Scanner’s data, see [docs/API.md](docs/API.md).
 
 That API is intentionally read-only and designed to return copies of data instead of exposing internal storage directly.
 
 ## Simple summary
 
-If you want a quick answer: BatataScanner helps you notice who is around, remember what you saw, and build a clean local census without turning your game into a bot or a spam tool.
+If you want a quick answer: Batata Scanner helps you notice who is around, remember what you saw, and build a clean local census without turning your game into a bot or a spam tool.
 
 It is a practical helper for players who like tracking, scouting, and understanding what is happening around them.
 
 ## License
 
-BatataScanner is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International license](LICENSE) (CC BY-NC 4.0).
+Batata Scanner is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International license](LICENSE) (CC BY-NC 4.0).
 
 You may share and adapt this project for noncommercial purposes with appropriate credit, a link to the license, and an indication of any changes.

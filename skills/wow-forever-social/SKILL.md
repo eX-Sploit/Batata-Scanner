@@ -1,6 +1,6 @@
 ---
 name: wow-forever-social
-description: 'Implement or debug BatataScanner Who queries, census coverage, passive observations, guild-state evidence, and Forever player identity; excludes recruitment and social mutations.'
+description: 'Implement or debug Batata Scanner Who queries, census coverage, passive observations, guild-state evidence, and Forever player identity; excludes recruitment and social mutations.'
 ---
 
 # WoW Forever scanning and census
@@ -19,7 +19,7 @@ A census is a summary of locally observed records, not an authoritative populati
 
 The pinned schema declares `C_FriendList.SendWho(filter, origin?, filters?)`, table-returning `GetWhoInfo(index)`, and delivered/total returns from `GetNumWhoResults()`. The native inspected UI interprets structured class/race arrays as excluded choices and map arrays as included choices. Do not guess inclusion semantics from field names or deploy structured filters without testing locale, empty arrays, and combinations.
 
-Keep query dispatch attached to an explicit UI/slash action. Timers may advance local cooldown/timeout state but do not inherit a click's execution context and must never autonomously dispatch queries. This is BatataScanner policy pending named-build verification, not a universal rule inferred from `HasRestrictions`.
+Keep query dispatch attached to an explicit UI/slash action. Timers may advance local cooldown/timeout state but do not inherit a click's execution context and must never autonomously dispatch queries. This is Batata Scanner policy pending named-build verification, not a universal rule inferred from `HasRestrictions`.
 
 Maintain one outstanding query. `WHO_LIST_UPDATE` is untagged: cancellation/timeout cannot safely attribute a later response to a new request. Preserve the late-response quarantine and stop unsafe retries. Detect external Who ownership conflicts and prefer a visible incomplete/blocked state over misattributing observations. Restore only native event registrations the scanner suspended, on every completion, pause, cancellation, failure, or conflict exit. Do not replace native scripts.
 

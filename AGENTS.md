@@ -1,6 +1,6 @@
-# BatataScanner contributor guidance
+# Batata Scanner contributor guidance
 
-BatataScanner is a standalone Lua addon for WoW Forever. Its manifest targets Interface **16001**. The `_classic_beta_` directory does not establish Classic Era API compatibility. Migrated source evidence is pinned to **1.60.1 (70374)**, collected **2026-10-14**; verify current runtime behavior separately.
+Batata Scanner is a standalone Lua addon for WoW Forever. Its manifest targets Interface **16001**. The `_classic_beta_` directory does not establish Classic Era API compatibility. Migrated source evidence is pinned to **1.60.1 (70374)**, collected **2026-10-14**; verify current runtime behavior separately.
 
 ## Scope and skills
 
@@ -16,11 +16,11 @@ Before relevant changes, read the matching skill. Skills apply to Codex and Copi
 ## Ownership and public contracts
 
 - Work only in this addon unless the user explicitly requests another repository. GuildHQ is a separate addon and source reference; do not import its SavedVariables or edit its files.
-- Preserve account-wide `BatataScanner_DB`. Initialization and observation ingestion belong to this addon. Never expose public database insertion, update, deletion, reset, settings mutation, scan control, or raw-table access methods.
-- The `BatataScanner` global is a versioned fetch/filter API. Read [docs/API.md](docs/API.md) before changing it. Return copies of data, including nested source maps and callback payloads. Preserve the read-only facade and prevent consumers from reaching internal modules through it.
+- Preserve account-wide `Batata_Scanner_DB`. Initialization and observation ingestion belong to this addon. Never expose public database insertion, update, deletion, reset, settings mutation, scan control, or raw-table access methods.
+- The `Batata_Scanner` global is a versioned fetch/filter API. Read [docs/API.md](docs/API.md) before changing it. Return copies of data, including nested source maps and callback payloads. Preserve the read-only facade and prevent consumers from reaching internal modules through it.
 - Shared Lua globals and SavedVariables are accessible to other addon code. A read-only API is a supported contract, not security isolation. Do not claim otherwise.
 - Preserve `nil` guild as unknown, empty string as confirmed unguilded, and a nonempty string as guilded. Do not replace reliable Who guild evidence with an uncertain passive absence.
-- Keep collection separate from consumers' recruitment or contact logic. BatataScanner only observes and provides census data; it does not whisper, invite, synchronize, or manage guild membership.
+- Keep collection separate from consumers' recruitment or contact logic. Batata Scanner only observes and provides census data; it does not whisper, invite, synchronize, or manage guild membership.
 - Confirm asynchronous requests by supported events/results. A nonthrowing `SendWho` call does not confirm delivery or a complete population count. Maintain one outstanding query, late-response quarantine, cancellation, and native UI restoration.
 
 ## API evidence and Lua conventions
@@ -31,7 +31,7 @@ Before Lua edits, read [formatting conventions](skills/wow-addon-api/references/
 
 ## Release versioning
 
-`## Version` in [BatataScanner.toc](BatataScanner.toc) is the only release version source. Runtime displays and the API must read metadata. Initial release is 1.0.0. Every later bugfix or feature requires one version bump before completion: patch for compatible fixes; minor with patch reset for compatible features; major with minor/patch reset when continued operation or compatibility requires consumers to upgrade. Apply the highest required bump once per completed change. `## X-API-Version` in the TOC is the only consumer API version source; increment it when the public API contract changes incompatibly.
+`## Version` in [Batata Scanner.toc](Batata%20Scanner.toc) is the only release version source. Runtime displays and the API must read metadata. Initial release is 1.0.0. Every later bugfix or feature requires one version bump before completion: patch for compatible fixes; minor with patch reset for compatible features; major with minor/patch reset when continued operation or compatibility requires consumers to upgrade. Apply the highest required bump once per completed change. `## X-API-Version` in the TOC is the only consumer API version source; increment it when the public API contract changes incompatibly.
 
 ## Validation
 

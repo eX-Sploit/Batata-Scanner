@@ -1,22 +1,22 @@
 ---
 name: wow-addon-api
-description: 'Implement, review, or debug BatataScanner Lua, TOC loading, API compatibility, lifecycle, persistence, and its read-only consumer contract on WoW Forever.'
+description: 'Implement, review, or debug Batata Scanner Lua, TOC loading, API compatibility, lifecycle, persistence, and its read-only consumer contract on WoW Forever.'
 ---
 
 # WoW addon API baseline
 
-Use this baseline for all BatataScanner Lua work, then select the focused UI, social, or workflow skill. Read [AGENTS.md](../../AGENTS.md) and [the API contract](../../docs/API.md) before changing public behavior.
+Use this baseline for all Batata Scanner Lua work, then select the focused UI, social, or workflow skill. Read [AGENTS.md](../../AGENTS.md) and [the API contract](../../docs/API.md) before changing public behavior.
 
 ## Target and evidence
 
-[BatataScanner.toc](../../BatataScanner.toc) targets Interface **16001**. The migrated [research](../../docs/wow-forever-api/README.md) records source **1.60.1 (70374)** at commit `735496de78ebd30ce816a0637982c556987f258c`, collected **2026-10-14**. It establishes declarations and source implementation, not installed-client behavior. The directory name does not establish Classic Era APIs. Record `GetBuildInfo()`, project/game type, locale, and capability when runtime behavior matters.
+[Batata Scanner.toc](../../Batata%20Scanner.toc) targets Interface **16001**. The migrated [research](../../docs/wow-forever-api/README.md) records source **1.60.1 (70374)** at commit `735496de78ebd30ce816a0637982c556987f258c`, collected **2026-10-14**. It establishes declarations and source implementation, not installed-client behavior. The directory name does not establish Classic Era APIs. Record `GetBuildInfo()`, project/game type, locale, and capability when runtime behavior matters.
 
 ## Project conventions
 
 - Follow [release versioning](../../AGENTS.md#release-versioning). Keep `## Version` and `## X-API-Version` in the TOC as the single release and API version sources; never hardcode them in Lua.
 - Read [Lua formatting](references/lua-formatting.md) and [.stylua.toml](../../.stylua.toml). Use descriptive bindings, Lua 5.1, four spaces, CRLF, multiline bodies, and aligned related assignments. Preserve multiple-return semantics when laying out declarations.
-- Keep the shared namespace supplied by `...` local and modules internal. Expose only the documented read-only `BatataScanner` facade, SavedVariables, named frames, and slash registration globals needed by the client. Ordinary Lua `require` does not replace TOC loading.
-- Keep persisted readiness separate from world/context readiness. Preserve false, zero, and empty defaults. Do not replace `BatataScanner_DB` or import another addon's database.
+- Keep the shared namespace supplied by `...` local and modules internal. Expose only the documented read-only `Batata_Scanner` facade, SavedVariables, named frames, and slash registration globals needed by the client. Ordinary Lua `require` does not replace TOC loading.
+- Keep persisted readiness separate from world/context readiness. Preserve false, zero, and empty defaults. Do not replace `Batata_Scanner_DB` or import another addon's database.
 - Return copies from fetchers, summaries, status, and callbacks. Do not expose internal tables or public mutators. A read-only facade is an integration contract in a shared Lua environment.
 - Reuse existing bounded work, state transitions, and widgets. Keep timers idle when unnecessary. Treat server work as asynchronous and confirm it through events/results.
 

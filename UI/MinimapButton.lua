@@ -1,4 +1,4 @@
--- BatataScanner: draggable minimap button that toggles the main window.
+-- Batata Scanner: draggable minimap button that toggles the main window.
 -- Addon folder name and the private namespace table shared by all addon files.
 local ADDON,
     NS = ...
@@ -38,7 +38,7 @@ function MinimapButton:Build()
     if self.button or not Minimap then
         return
     end
-    local button = CreateFrame("Button", "BatataScanner_MinimapButton", Minimap)
+    local button = CreateFrame("Button", "Batata_Scanner_MinimapButton", Minimap)
     self.button = button
     button:SetSize(31, 31)
     button:SetFrameStrata("MEDIUM")
@@ -74,7 +74,7 @@ function MinimapButton:Build()
     button:SetScript("OnDragStop", function(self)
         self:SetScript("OnUpdate", nil)
     end)
-    Widgets.Tooltip(button, "BatataScanner", "Click to open or close the window. Drag to move this button.")
+    Widgets.Tooltip(button, "Batata Scanner", "Click to open or close the window. Drag to move this button.")
     Place(button, NS.db.minimap.angle)
 end
 

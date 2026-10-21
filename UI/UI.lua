@@ -1,4 +1,4 @@
--- BatataScanner: GuildHQ's portrait shell and right-side navigation.
+-- Batata Scanner: GuildHQ's portrait shell and right-side navigation.
 -- Addon folder name and the private namespace table shared by all addon files.
 local ADDON,
     NS = ...
@@ -102,9 +102,9 @@ local function Build()
     if frame then
         return
     end
-    frame     = CreateFrame("Frame", "BatataScanner_MainFrame", UIParent, "PortraitFrameTemplateMinimizable")
+    frame     = CreateFrame("Frame", "Batata_Scanner_MainFrame", UIParent, "PortraitFrameTemplateMinimizable")
     UI.frame  = frame
-    frame:SetTitle("BatataScanner")
+    frame:SetTitle("Batata Scanner")
     frame:SetTitleOffsets(58, -58)
     frame:GetTitleText():SetJustifyH("CENTER")
     frame:SetPoint("CENTER")
@@ -262,8 +262,8 @@ local function Build()
     end)
     frame:HookScript("OnShow", frame.Raise)
     frame:HookScript("OnShow", QueueRefresh)
-    UISpecialFrames[#UISpecialFrames + 1] = "BatataScanner_MainFrame"
-    local proxyName  = "BatataScanner_Dismiss"
+    UISpecialFrames[#UISpecialFrames + 1] = "Batata_Scanner_MainFrame"
+    local proxyName  = "Batata_Scanner_Dismiss"
     local proxy      = CreateFrame("Frame", proxyName, UIParent)
     proxy:SetSize(1, 1)
     proxy:SetPoint("CENTER")
@@ -275,8 +275,8 @@ local function Build()
         local panel = NS.ScannerPanel
         local active = frame:IsShown() and activePage == "Scanner" and (panel.scanSettings:IsShown() or panel.searching)
         for frameIndex, name in ipairs(UISpecialFrames) do
-            if name == "BatataScanner_MainFrame" or name == proxyName then
-                UISpecialFrames[frameIndex] = active and proxyName or "BatataScanner_MainFrame"
+            if name == "Batata_Scanner_MainFrame" or name == proxyName then
+                UISpecialFrames[frameIndex] = active and proxyName or "Batata_Scanner_MainFrame"
             end
         end
         self.suppress = true
@@ -291,7 +291,7 @@ local function Build()
         end
     end)
     for frameIndex = #UISpecialFrames, 1, -1 do
-        if UISpecialFrames[frameIndex] == "BatataScanner_ScanSettings" then
+        if UISpecialFrames[frameIndex] == "Batata_Scanner_ScanSettings" then
             table.remove(UISpecialFrames, frameIndex)
         end
     end

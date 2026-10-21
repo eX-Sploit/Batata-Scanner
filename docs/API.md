@@ -1,12 +1,12 @@
-# BatataScanner consumer API
+# Batata Scanner consumer API
 
-The `BatataScanner` global exposes API version **1**. Call functions using dot syntax: `BatataScanner.GetCensus()`. Runtime modules, observation ingestion, settings, scan controls, and database tables are private implementation details. There are no public database mutation methods.
+The `Batata_Scanner` global exposes API version **1**. Call functions using dot syntax: `Batata_Scanner.GetCensus()`. Runtime modules, observation ingestion, settings, scan controls, and database tables are private implementation details. There are no public database mutation methods.
 
 Every returned data structure is a fresh copy, including census maps/context. Changing a result cannot change stored data. The facade rejects ordinary assignment and hides its metatable. This is an integration contract, not security isolation: WoW addons share Lua globals and SavedVariables.
 
 ## Loading and readiness
 
-Use `## Dependencies: BatataScanner` in a consumer's TOC when required, or `## OptionalDeps: BatataScanner` and handle its absence. A loaded API can exist before character context is ready. Check `IsReady()` before data reads; `GetPlayer`, `FindPlayers`, `CountPlayers`, and `GetCensus` raise an error before readiness.
+Use `## Dependencies: Batata Scanner` in a consumer's TOC when required, or `## OptionalDeps: Batata Scanner` and handle its absence. A loaded API can exist before character context is ready. Check `IsReady()` before data reads; `GetPlayer`, `FindPlayers`, `CountPlayers`, and `GetCensus` raise an error before readiness.
 
 | Function | Result |
 |---|---|
@@ -28,7 +28,7 @@ Saved-data schema 1 is the initial format. Existing databases from pre-1.0.0 dev
 
 ## Context and player records
 
-WoW Forever is realmless, so BatataScanner does not record or partition by realm. All recorded players, of either faction, share one collection, and reads include every faction unless a `faction` filter is supplied. Faction values are `"Alliance"` or `"Horde"`. Use `GetContext().faction` to filter to the current character's faction. Treat context `key` as opaque.
+WoW Forever is realmless, so Batata Scanner does not record or partition by realm. All recorded players, of either faction, share one collection, and reads include every faction unless a `faction` filter is supplied. Faction values are `"Alliance"` or `"Horde"`. Use `GetContext().faction` to filter to the current character's faction. Treat context `key` as opaque.
 
 `GetPlayer` tidies whitespace and uses Lua's ordinary case folding for lookup. It preserves full surname/hyphen identity and does not infer a realm suffix from the name.
 
@@ -74,7 +74,7 @@ Use `guild = ""` for confirmed unguilded records. Omitting a guild filter includ
 String sorting uses case-folded values; numeric sorting treats unknown values as zero. Names break ties. A result has `{ players, total, offset, limit, revision, hasMore }`. `total` is the full match count, while `players` contains only the requested page. `revision` is the global database revision, advanced by observation changes and retention cleanup. Results from separate calls are not a transaction: if revision changes while paging, restart pagination when a consistent view matters.
 
 ```lua
-local page = BatataScanner.FindPlayers(
+local page = Batata_Scanner.FindPlayers(
     { guild = "", minLevel = 30, seenAfter = time() - 86400 },
     { sort = "lastSeen", descending = true, offset = 0, limit = 200 }
 )
@@ -133,7 +133,7 @@ Supported events are `"READY"`, `"DATA_UPDATED"`, and `"SCAN_STATUS_CHANGED"`. C
 `READY` is not replayed to late subscribers. Subscribe, then inspect `IsReady()` for already-loaded state. Store subscription tokens and unregister when your module stops.
 
 ```lua
-local censusProvider = BatataScanner
+local censusProvider = Batata_Scanner
 local function RefreshFromScanner(eventName, revision)
     if censusProvider.IsReady() then
         local census = censusProvider.GetCensus()

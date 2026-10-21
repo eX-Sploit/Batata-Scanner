@@ -1,4 +1,4 @@
--- BatataScanner: read-only public API exposed through the BatataScanner global.
+-- Batata Scanner: read-only public API exposed through the Batata_Scanner global.
 -- Addon folder name and the shared private namespace supplied by the client.
 local ADDON,
     NS = ...
@@ -9,7 +9,7 @@ local validEvents  = { READY = true, DATA_UPDATED = true, SCAN_STATUS_CHANGED = 
 -- Raises a caller-facing error when saved data or character context is not ready yet.
 local function RequireReady()
     if not NS.ready then
-        error("BatataScanner is not ready; check IsReady() or subscribe to READY", 3)
+        error("Batata Scanner is not ready; check IsReady() or subscribe to READY", 3)
     end
 end
 
@@ -71,7 +71,7 @@ end
 -- Subscribes to event (READY, DATA_UPDATED, or SCAN_STATUS_CHANGED) with a callback receiving event name and revision.
 function methods.RegisterCallback(event, callback)
     if not NS.Readable(event) or not validEvents[event] then
-        error("Unsupported BatataScanner event", 2)
+        error("Unsupported Batata Scanner event", 2)
     end
     if type(callback) ~= "function" then
         error("callback must be a function", 2)
@@ -85,11 +85,11 @@ function methods.UnregisterCallback(token)
 end
 
 -- Global read-only consumer facade; only detached projections leave it, while runtime modules and saved data stay private.
-BatataScanner = setmetatable({}, {
+Batata_Scanner = setmetatable({}, {
     __index     = methods,
     -- Rejects consumer attempts to add or replace methods on the public facade.
     __newindex  = function()
-        error("BatataScanner API is read-only", 2)
+        error("Batata Scanner API is read-only", 2)
     end,
-    __metatable = "BatataScanner read-only API",
+    __metatable = "Batata Scanner read-only API",
 })

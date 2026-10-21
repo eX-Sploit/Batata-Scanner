@@ -1,4 +1,4 @@
--- BatataScanner
+-- Batata Scanner
 -- Widgets.lua : standalone adaptations of GuildHQ shared visual primitives.
 
 -- Addon folder name and the private namespace shared by every file in the TOC.
@@ -542,7 +542,7 @@ local function OpenDropdown(dropdown)
         dropBlocker:RegisterForClicks("AnyUp")
         dropBlocker:SetScript("OnClick", CloseDropdown)
         dropBlocker:Hide()
-        dropList = CreateFrame("Frame", "BatataScanner_DropdownList", UIParent, "BackdropTemplate")
+        dropList = CreateFrame("Frame", "Batata_Scanner_DropdownList", UIParent, "BackdropTemplate")
         Widgets.Surface(dropList, true)
         dropList:SetFrameStrata("FULLSCREEN_DIALOG")
         dropList:SetFrameLevel(dropBlocker:GetFrameLevel() + 10)
@@ -557,7 +557,7 @@ local function OpenDropdown(dropdown)
             self.owner = nil
         end)
         dropList:Hide()
-        tinsert(UISpecialFrames, "BatataScanner_DropdownList")
+        tinsert(UISpecialFrames, "Batata_Scanner_DropdownList")
     end
     if dropList:IsShown() and dropList.owner == dropdown then
         CloseDropdown()
@@ -989,7 +989,7 @@ local function CreateTable(parent, columns, tableOptions)
     end
 
     local scroll =
-        CreateFrame("ScrollFrame", "BatataScanner_Table" .. tableCount, tableFrame, "FauxScrollFrameTemplate")
+        CreateFrame("ScrollFrame", "Batata_Scanner_Table" .. tableCount, tableFrame, "FauxScrollFrameTemplate")
     local layoutInProgress = false
     listTable.scroll = scroll
     if header then

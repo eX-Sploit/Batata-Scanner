@@ -1,4 +1,4 @@
--- BatataScanner: player census store with persistence, filtering, sorting, and search.
+-- Batata Scanner: player census store with persistence, filtering, sorting, and search.
 -- Addon folder name and the shared private namespace supplied by the client.
 local ADDON,
     NS = ...

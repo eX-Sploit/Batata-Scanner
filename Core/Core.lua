@@ -1,4 +1,4 @@
--- BatataScanner: startup, value helpers, internal events, DB migration, and slash commands.
+-- Batata Scanner: startup, value helpers, internal events, DB migration, and slash commands.
 -- Addon folder name and the shared private namespace supplied by the client.
 local ADDON,
     NS = ...
@@ -38,7 +38,7 @@ NS.FactionRaces = {
 
 local listeners   = {} -- Internal event subscriptions keyed by listener token.
 local nextToken   = 0 -- Most recently issued listener token.
-local savedReady  = false -- True after BatataScanner_DB has been migrated and normalized.
+local savedReady  = false -- True after Batata_Scanner_DB has been migrated and normalized.
 
 -- Returns whether a value is neither a secret value nor otherwise inaccessible to addon code.
 -- @param value Candidate value whose readability is checked before use.
@@ -107,7 +107,7 @@ end
 -- @param message Text to display to the player.
 function NS:Print(message)
     if DEFAULT_CHAT_FRAME then
-        DEFAULT_CHAT_FRAME:AddMessage("|cffffcc66BatataScanner|r: " .. tostring(message))
+        DEFAULT_CHAT_FRAME:AddMessage("|cffffcc66Batata Scanner|r: " .. tostring(message))
     end
 end
 
@@ -159,7 +159,7 @@ local function InitializeSavedState()
     if savedReady then
         return
     end
-    local database = BatataScanner_DB
+    local database = Batata_Scanner_DB
     if
         type(database) ~= "table"
         or database.schemaVersion ~= 1
@@ -212,9 +212,9 @@ local function InitializeSavedState()
     else
         settings.scanClasses = nil
     end
-    BatataScanner_DB  = database
-    NS.db             = database
-    savedReady        = true
+    Batata_Scanner_DB  = database
+    NS.db              = database
+    savedReady         = true
     NS.Store:PruneExpired()
 end
 
@@ -264,10 +264,10 @@ eventFrame:SetScript("OnEvent", function(frame, event, loadedAddon)
     end
 end)
 
-SLASH_BATATASCANNER1  = "/batatascanner" -- Primary slash command.
-SLASH_BATATASCANNER2  = "/bs" -- Short slash command alias.
+SLASH_BATATA_SCANNER1  = "/batata-scanner" -- Primary slash command.
+SLASH_BATATA_SCANNER2  = "/bs" -- Short slash command alias.
 -- Dispatches /bs chat commands; message is the text following the slash command.
-SlashCmdList.BATATASCANNER  = function(message)
+SlashCmdList.BATATA_SCANNER  = function(message)
     local command = (message or ""):match("^%s*(%S*)"):lower()
     if not NS.ready then
         NS:Print("Waiting for saved data and character information.")
@@ -288,7 +288,7 @@ SlashCmdList.BATATASCANNER  = function(message)
                 .. ": "
                 .. (status.reason or "Ready")
                 .. " | stored players: "
-                .. tostring(BatataScanner.CountPlayers())
+                .. tostring(Batata_Scanner.CountPlayers())
         )
     elseif command == "" then
         NS.UI:Toggle()

@@ -58,9 +58,9 @@ class GuidanceTests(unittest.TestCase):
 
     def test_manifest_runtime_files_exist_and_exclude_development_files(self):
         """Verifies that manifest runtime files exist and exclude development files."""
-        text = (ROOT / "BatataScanner.toc").read_text(encoding="utf-8")
+        text = (ROOT / "Batata Scanner.toc").read_text(encoding="utf-8")
         self.assertRegex(text, r"(?m)^## Interface: 16001$")
-        self.assertRegex(text, r"(?m)^## SavedVariables: BatataScanner_DB$")
+        self.assertRegex(text, r"(?m)^## SavedVariables: Batata_Scanner_DB$")
         self.assertRegex(text, r"(?m)^## Version: \d+\.\d+\.\d+$")
         self.assertRegex(text, r"(?m)^## X-API-Version: [1-9]\d*$")
         loaded = [line.strip() for line in text.splitlines() if line.strip() and not line.startswith("#")]

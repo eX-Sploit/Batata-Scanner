@@ -7,7 +7,7 @@ from harness import Harness
 
 # Shared class/race filters and saved settings used by scanner state-machine tests.
 SCANNER_SETUP = '''
-BatataScanner_DB={schemaVersion=1,settings={queryInterval=5}}
+Batata_Scanner_DB={schemaVersion=1,settings={queryInterval=5}}
 C_FriendList.GetWhoRaceFilters=function()
     return {{name="Human",ID=1},{name="Dwarf",ID=3}}
 end
@@ -21,7 +21,7 @@ Enum.SocialWhoOrigin={Social=1}
 '''
 
 # Most tests begin a sweep explicitly, so they start from a stopped scanner.
-STOPPED_SETUP = SCANNER_SETUP + 'BatataScanner_DB={schemaVersion=1,settings={scanBehavior="ordered",queryInterval=5},scanner={state="stopped"}}\n'
+STOPPED_SETUP = SCANNER_SETUP + 'Batata_Scanner_DB={schemaVersion=1,settings={scanBehavior="ordered",queryInterval=5},scanner={state="stopped"}}\n'
 
 # Expected WoW Forever race/class matrix used by query-planning regressions.
 FOREVER_RACES = {
@@ -71,12 +71,12 @@ class ScannerTests(unittest.TestCase):
     def reload(self):
         """Serializes saved state and starts a fresh harness at the same client clock."""
         database, clock = self.harness.execute(
-            SERIALIZE + "Emit('PLAYER_LOGOUT'); return Serialize(BatataScanner_DB), clock")
-        self.harness = Harness(setup=SCANNER_SETUP + f"BatataScanner_DB={database}\nclock={clock!r}\n")
+            SERIALIZE + "Emit('PLAYER_LOGOUT'); return Serialize(Batata_Scanner_DB), clock")
+        self.harness = Harness(setup=SCANNER_SETUP + f"Batata_Scanner_DB={database}\nclock={clock!r}\n")
 
     def test_default_state_is_playing_without_dispatching(self):
         """Verifies that default state is playing without dispatching."""
-        self.harness = Harness(setup=SCANNER_SETUP + 'BatataScanner_DB=nil')
+        self.harness = Harness(setup=SCANNER_SETUP + 'Batata_Scanner_DB=nil')
         self.check("NS.db.settings.queryInterval==15")
         self.check("NS.db.settings.scanBehavior=='random'")
         self.check("NS.Scanner:GetStatus().running and not NS.Scanner:GetStatus().paused")
@@ -115,9 +115,9 @@ class ScannerTests(unittest.TestCase):
                 if paused:
                     self.harness.execute("NS.Scanner:Pause()")
                 database, clock = self.harness.execute(
-                    SERIALIZE + "Emit('PLAYER_LOGOUT'); return Serialize(BatataScanner_DB), clock")
+                    SERIALIZE + "Emit('PLAYER_LOGOUT'); return Serialize(Batata_Scanner_DB), clock")
                 self.harness = Harness(setup=SCANNER_SETUP +
-                    f'BatataScanner_DB={database}\nclock={clock!r}\n' +
+                    f'Batata_Scanner_DB={database}\nclock={clock!r}\n' +
                     'function UnitFactionGroup() return "Horde" end')
                 self.check("NS.Scanner:GetStatus().completedQueries==0")
                 self.check("NS.Scanner:GetStatus().remainingQueries==2")
@@ -138,7 +138,7 @@ class ScannerTests(unittest.TestCase):
     def test_legacy_queue_without_faction_cannot_claim_complete_coverage(self):
         """Verifies that legacy queue without faction cannot claim complete coverage."""
         self.harness = Harness(setup=SCANNER_SETUP + '''
-            BatataScanner_DB={schemaVersion=1,scanner={state="ready",running=true,
+            Batata_Scanner_DB={schemaVersion=1,scanner={state="ready",running=true,
                 queue={{minLevel=11,maxLevel=20}},completedQueries=1,plannedQueries=2}}
         ''')
         self.harness.click("assert(NS.Scanner:Continue())")
@@ -149,11 +149,11 @@ class ScannerTests(unittest.TestCase):
         """Verifies that saved scanner state keeps only resume fields."""
         self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=30}))")
         self.harness.execute("Deliver({{fullName='Alice',level=5}},1); Emit('PLAYER_LOGOUT')")
-        self.check("BatataScanner_DB.scanner.seen==nil and BatataScanner_DB.scanner.observed==nil")
-        self.check("BatataScanner_DB.scanner.faction=='Alliance'")
-        self.check("BatataScanner_DB.scanner.returned==nil and BatataScanner_DB.scanner.total==nil")
-        self.check("BatataScanner_DB.scanner.reason==nil and BatataScanner_DB.scanner.newPlayers==1")
-        self.check("#BatataScanner_DB.scanner.queue==2 and BatataScanner_DB.scanner.running")
+        self.check("Batata_Scanner_DB.scanner.seen==nil and Batata_Scanner_DB.scanner.observed==nil")
+        self.check("Batata_Scanner_DB.scanner.faction=='Alliance'")
+        self.check("Batata_Scanner_DB.scanner.returned==nil and Batata_Scanner_DB.scanner.total==nil")
+        self.check("Batata_Scanner_DB.scanner.reason==nil and Batata_Scanner_DB.scanner.newPlayers==1")
+        self.check("#Batata_Scanner_DB.scanner.queue==2 and Batata_Scanner_DB.scanner.running")
 
     def test_incomplete_reason_is_saved_and_restored(self):
         """Verifies that incomplete reason is saved and restored."""
@@ -192,7 +192,7 @@ class ScannerTests(unittest.TestCase):
         self.check("NS.Scanner:GetStatus().running and NS.Scanner:GetStatus().remainingQueries==1")
         self.check("NS.Scanner:GetStatus().pendingLateResponse and NS.Scanner:GetStatus().currentQuery=='51-60'")
         self.harness.execute("Deliver({{fullName='Late',level=5}})")
-        self.check("BatataScanner.CountPlayers()==0 and NS.Scanner:GetStatus().pendingLateResponse")
+        self.check("Batata_Scanner.CountPlayers()==0 and NS.Scanner:GetStatus().pendingLateResponse")
         self.harness.advance(10)
         self.harness.click("assert(NS.Scanner:Continue())")
         self.check("#whoCalls==2 and whoCalls[2]=='51-60'")
@@ -218,7 +218,7 @@ class ScannerTests(unittest.TestCase):
         for saved_value in ("nil", "'sideways'", "false", "{}", "'ordered'", "'reversed'", "'random'"):
             with self.subTest(saved_value=saved_value):
                 self.harness = Harness(setup=SCANNER_SETUP + 'math.random=function(choiceCount) return 1 end; ' +
-                                       f"BatataScanner_DB={{schemaVersion=1,settings={{scanBehavior={saved_value}}}}}")
+                                       f"Batata_Scanner_DB={{schemaVersion=1,settings={{scanBehavior={saved_value}}}}}")
                 expected_behavior = saved_value.strip("'") if saved_value in ("'ordered'", "'reversed'") else "random"
                 expected_query = "1-10" if expected_behavior == "ordered" else "51-60"
                 self.check(f"NS.db.settings.scanBehavior=='{expected_behavior}'")
@@ -327,13 +327,13 @@ class ScannerTests(unittest.TestCase):
 
     def test_debug_command_reports_query_and_response_size(self):
         """Verifies that debug command reports query and response size."""
-        self.harness.execute("SlashCmdList.BATATASCANNER('debug')")
+        self.harness.execute("SlashCmdList.BATATA_SCANNER('debug')")
         self.check("chat[1]:find('Who query debug enabled.',1,true)~=nil")
         self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=10}))")
         self.check("whoCalls[1]=='1-10' and chat[2]:find('Who query: 1-10',1,true)~=nil")
         self.harness.execute("Deliver({{fullName='Alice',level=5}},2)")
         self.check("chat[3]:find('Who response: 1 rows received (server total: 2).',1,true)~=nil")
-        self.harness.execute("SlashCmdList.BATATASCANNER('debug')")
+        self.harness.execute("SlashCmdList.BATATA_SCANNER('debug')")
         self.check("chat[4]:find('Who query debug disabled.',1,true)~=nil")
 
     def test_reload_keeps_a_paused_sweep_paused(self):
@@ -386,7 +386,7 @@ class ScannerTests(unittest.TestCase):
         self.check("NS.Scanner:GetStatus().running and not NS.Scanner:GetStatus().awaiting")
         self.check("NS.Scanner:GetStatus().incomplete and NS.Scanner:GetStatus().pendingLateResponse")
         self.harness.execute("Deliver({{fullName='Late',level=5}})")
-        self.check("BatataScanner.CountPlayers()==0 and NS.Scanner:GetStatus().pendingLateResponse")
+        self.check("Batata_Scanner.CountPlayers()==0 and NS.Scanner:GetStatus().pendingLateResponse")
         self.harness.advance(5)
         self.harness.click("assert(not NS.Scanner:Continue())")
         self.harness.advance(5)
@@ -399,8 +399,8 @@ class ScannerTests(unittest.TestCase):
         """Verifies that reload after an interrupted hold expires keeps the warning."""
         self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=10}))")
         database, clock = self.harness.execute(
-            SERIALIZE + "Emit('PLAYER_LOGOUT'); return Serialize(BatataScanner_DB),clock")
-        self.harness = Harness(setup=SCANNER_SETUP + f"BatataScanner_DB={database}\nclock={clock + 30!r}\n")
+            SERIALIZE + "Emit('PLAYER_LOGOUT'); return Serialize(Batata_Scanner_DB),clock")
+        self.harness = Harness(setup=SCANNER_SETUP + f"Batata_Scanner_DB={database}\nclock={clock + 30!r}\n")
         self.check("NS.Scanner:GetStatus().incomplete and not NS.Scanner:GetStatus().pendingLateResponse")
         self.check("NS.Scanner:GetStatus().cooldown==0")
         self.harness.click("assert(NS.Scanner:Continue())")
@@ -412,12 +412,12 @@ class ScannerTests(unittest.TestCase):
         self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=30}))")
         self.harness.emit("PLAYER_LEAVING_WORLD")
         self.harness.execute("Deliver({{fullName='Alice',level=5}})")
-        self.check("NS.Scanner:GetStatus().running and BatataScanner.CountPlayers()==1")
+        self.check("NS.Scanner:GetStatus().running and Batata_Scanner.CountPlayers()==1")
 
     def test_invalid_saved_queries_are_dropped_and_reported(self):
         """Verifies that invalid saved queries are dropped and reported."""
         self.harness = Harness(setup=SCANNER_SETUP + '''
-            BatataScanner_DB={schemaVersion=1,scanner={running=true,plannedQueries=3,queue={
+            Batata_Scanner_DB={schemaVersion=1,scanner={running=true,plannedQueries=3,queue={
                 {minLevel=1,maxLevel=10},{minLevel=20,maxLevel=5},{raw="a\\nb"}}}}
         ''')
         self.check("NS.Scanner:GetStatus().running and NS.Scanner:GetStatus().remainingQueries==1")
@@ -536,7 +536,7 @@ class ScannerTests(unittest.TestCase):
     def test_saved_impossible_or_unsupported_pairs_are_discarded(self):
         """Verifies that saved impossible or unsupported pairs are discarded."""
         self.harness = Harness(setup=SCANNER_SETUP + '''
-            BatataScanner_DB={schemaVersion=1,scanner={running=true,plannedQueries=4,queue={
+            Batata_Scanner_DB={schemaVersion=1,scanner={running=true,plannedQueries=4,queue={
                 {minLevel=60,maxLevel=60,race="Dwarf",className="Mage"},
                 {minLevel=60,maxLevel=60,race="Vulpera",className="Warrior"},
                 {minLevel=60,maxLevel=60,race="Human",className="Death Knight"},
@@ -602,7 +602,7 @@ class ScannerTests(unittest.TestCase):
                 self.harness.execute(
                     f"Deliver({{{{fullName='Localized Player',level=5,classStr='{class_name}',filename={class_token}}}}})")
                 self.check("NS.Scanner:GetStatus().state=='complete' and NS.Scanner:GetStatus().completedQueries==1")
-                self.check("BatataScanner.CountPlayers()==1 and not NS.Scanner:GetStatus().incomplete")
+                self.check("Batata_Scanner.CountPlayers()==1 and not NS.Scanner:GetStatus().incomplete")
 
     def test_reference_roster_remains_available_without_native_lookup_apis(self):
         """Verifies that reference roster remains available without native lookup apis."""
@@ -646,7 +646,7 @@ class ScannerTests(unittest.TestCase):
         self.check("#whoCalls==2 and whoCalls[1]=='1-10' and whoCalls[2]=='1-10'")
         self.harness.execute("Deliver({{fullName='Retried',level=5}})")
         self.check("NS.Scanner:GetStatus().completedQueries==1 and NS.Scanner:GetStatus().remainingQueries==1")
-        self.check("BatataScanner.CountPlayers()==1 and NS.Scanner:GetStatus().incomplete")
+        self.check("Batata_Scanner.CountPlayers()==1 and NS.Scanner:GetStatus().incomplete")
 
     def test_external_query_without_a_reply_does_not_stall_the_sweep(self):
         """Verifies that external query without a reply does not stall the sweep."""
@@ -658,7 +658,7 @@ class ScannerTests(unittest.TestCase):
         self.check("NS.Scanner:GetStatus().running and not NS.Scanner:GetStatus().paused")
         self.harness.execute("Deliver({{fullName='External',level=5}})")
         self.harness.advance(10)
-        self.check("#whoCalls==1 and BatataScanner.CountPlayers()==0")
+        self.check("#whoCalls==1 and Batata_Scanner.CountPlayers()==0")
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
         self.check("#whoCalls==2 and whoCalls[2]==firstQuery")
 
@@ -690,12 +690,12 @@ class ScannerTests(unittest.TestCase):
             with self.subTest(event_name=event_name):
                 self.harness = Harness(setup=STOPPED_SETUP)
                 self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=20}))")
-                self.harness.emit(event_name, "BatataScanner")
+                self.harness.emit(event_name, "Batata Scanner")
                 self.check("NS.Scanner:GetStatus().running and not NS.Scanner:GetStatus().paused")
                 self.check("NS.Scanner:GetStatus().pendingLateResponse and not NS.Scanner:GetStatus().awaiting")
                 self.harness.execute("Deliver({{fullName='Late',level=5}})")
                 self.harness.advance(10)
-                self.check("#whoCalls==1 and BatataScanner.CountPlayers()==0")
+                self.check("#whoCalls==1 and Batata_Scanner.CountPlayers()==0")
                 self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
                 self.check("#whoCalls==2 and whoCalls[2]==whoCalls[1]")
 
@@ -722,7 +722,7 @@ class ScannerTests(unittest.TestCase):
     def test_saved_reload_required_state_recovers_its_queued_work(self):
         """Verifies that saved reload required state recovers its queued work."""
         self.harness = Harness(setup=SCANNER_SETUP + '''
-            BatataScanner_DB={schemaVersion=1,settings={queryInterval=5},scanner={state="blocked",running=false,paused=false,
+            Batata_Scanner_DB={schemaVersion=1,settings={queryInterval=5},scanner={state="blocked",running=false,paused=false,
                 queue={{minLevel=1,maxLevel=10}},plannedQueries=1,incomplete=true,
                 sentAt=100,reason="Overlapping Who requests. Reload the UI before scanning again."}}
         ''')
@@ -742,11 +742,11 @@ class ScannerTests(unittest.TestCase):
         self.harness.click("assert(not NS.Scanner:Continue())")
         self.check("#whoCalls==1")
         self.harness.execute("Deliver({{fullName='Late Player',level=5}})")
-        self.check("BatataScanner.CountPlayers()==0 and NS.Scanner:GetStatus().pendingLateResponse")
+        self.check("Batata_Scanner.CountPlayers()==0 and NS.Scanner:GetStatus().pendingLateResponse")
         self.harness.advance(9)
         self.harness.click("assert(NS.Scanner:Continue())")
         self.harness.execute("Deliver({{fullName='Fresh Player',level=5}})")
-        self.check("#whoCalls==2 and BatataScanner.CountPlayers()==1")
+        self.check("#whoCalls==2 and Batata_Scanner.CountPlayers()==1")
         self.check("NS.Scanner:GetStatus().state=='complete'")
 
     def test_unanswered_query_cooldown_expires_even_after_stop(self):
@@ -759,7 +759,7 @@ class ScannerTests(unittest.TestCase):
         self.check("NS.Scanner:GetStatus().pendingLateResponse")
         self.check("not NS.Scanner:GetStatus().reason:lower():find('reload',1,true)")
         self.harness.click("assert(not NS.Scanner:Start())")
-        self.check("#whoCalls==1 and BatataScanner.CountPlayers()==0")
+        self.check("#whoCalls==1 and Batata_Scanner.CountPlayers()==0")
         self.harness.advance(9)
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
         self.check("not NS.Scanner:GetStatus().pendingLateResponse and #whoCalls==1")
@@ -779,13 +779,13 @@ class ScannerTests(unittest.TestCase):
         self.harness.advance(6)
         self.harness.click("assert(not NS.Scanner:Continue())")
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
-        self.check("#whoCalls==1 and BatataScanner.CountPlayers()==0")
+        self.check("#whoCalls==1 and Batata_Scanner.CountPlayers()==0")
         self.harness.advance(6)
         self.check("NS.Scanner:GetStatus().cooldown==0 and #whoCalls==1")
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
         self.harness.execute("Deliver({{fullName='Fresh',level=5}})")
         self.check("#whoCalls==2 and whoCalls[2]=='5-5' and NS.Scanner:GetStatus().state=='complete'")
-        self.check("BatataScanner.CountPlayers()==1")
+        self.check("Batata_Scanner.CountPlayers()==1")
 
     def test_delayed_who_throttle_recovers_a_timed_out_query(self):
         """Verifies that delayed who throttle recovers a timed out query."""
@@ -804,7 +804,7 @@ class ScannerTests(unittest.TestCase):
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
         self.harness.execute("Deliver({{fullName='Fresh',level=5}})")
         self.check("#whoCalls==2 and whoCalls[2]=='5-5' and NS.Scanner:GetStatus().state=='complete'")
-        self.check("BatataScanner.CountPlayers()==1")
+        self.check("Batata_Scanner.CountPlayers()==1")
 
     def test_delayed_who_throttle_preserves_an_explicit_pause(self):
         """Verifies that delayed who throttle preserves an explicit pause."""
@@ -850,7 +850,7 @@ class ScannerTests(unittest.TestCase):
         self.harness.execute("Deliver({{fullName='Late',level=5}})")
         self.harness.emit("CHAT_MSG_SYSTEM", "You must wait a moment longer before using /who again")
         self.check("not NS.Scanner:GetStatus().paused and NS.Scanner:GetStatus().pendingLateResponse")
-        self.check("NS.Scanner:GetStatus().cooldown==9 and BatataScanner.CountPlayers()==0")
+        self.check("NS.Scanner:GetStatus().cooldown==9 and Batata_Scanner.CountPlayers()==0")
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
         self.check("#whoCalls==1")
         self.harness.advance(9)
@@ -867,7 +867,7 @@ class ScannerTests(unittest.TestCase):
         self.check("NS.Scanner:GetStatus().pendingLateResponse and NS.Scanner:GetStatus().running")
         self.check("not NS.Scanner:GetStatus().blockedUntilReload and NS.Scanner:GetStatus().cooldown==10")
         self.harness.advance(20)
-        self.check("#whoCalls==2 and BatataScanner.CountPlayers()==0")
+        self.check("#whoCalls==2 and Batata_Scanner.CountPlayers()==0")
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
         self.check("#whoCalls==3")
 
@@ -952,7 +952,7 @@ class ScannerTests(unittest.TestCase):
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
         self.harness.execute("Deliver({{fullName='Resumed',level=15}})")
         self.check("#whoCalls==2 and whoCalls[2]=='11-20' and NS.Scanner:GetStatus().state=='complete'")
-        self.check("NS.Scanner:GetStatus().newPlayers==2 and BatataScanner.CountPlayers()==2")
+        self.check("NS.Scanner:GetStatus().newPlayers==2 and Batata_Scanner.CountPlayers()==2")
 
     def test_who_throttle_preserves_explicit_pause_across_reload(self):
         """Verifies that who throttle preserves explicit pause across reload."""
@@ -980,7 +980,7 @@ class ScannerTests(unittest.TestCase):
         self.check("not NS.Scanner:GetStatus().externalQueryPending")
         self.harness.advance(12)
         self.harness.click("assert(NS.Scanner:Start())")
-        self.check("#whoCalls==2 and BatataScanner.CountPlayers()==0")
+        self.check("#whoCalls==2 and Batata_Scanner.CountPlayers()==0")
 
     def test_unrelated_or_unreadable_notifications_do_not_release_a_query(self):
         """Verifies that unrelated or unreadable notifications do not release a query."""
@@ -1002,7 +1002,7 @@ class ScannerTests(unittest.TestCase):
         self.check("not WhoFrame:IsEventRegistered('WHO_LIST_UPDATE') and not whoRouting")
         self.harness.click("assert(not NS.Scanner:Start())")
         self.harness.execute("Deliver({{fullName='Late',level=1}})")
-        self.check("BatataScanner.CountPlayers()==0")
+        self.check("Batata_Scanner.CountPlayers()==0")
         self.harness.advance(10)
         self.harness.click("assert(NS.Scanner:Start())")
 
@@ -1011,7 +1011,7 @@ class ScannerTests(unittest.TestCase):
         self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=20}))")
         self.harness.execute("NS.Scanner:Pause(); Deliver({{fullName='A',level=5}})")
         self.harness.advance(15)
-        self.check("NS.Scanner:GetStatus().paused and #whoCalls==1 and BatataScanner.CountPlayers()==1")
+        self.check("NS.Scanner:GetStatus().paused and #whoCalls==1 and Batata_Scanner.CountPlayers()==1")
         self.harness.click("assert(NS.Scanner:Continue())")
         self.check("#whoCalls==2")
 
@@ -1022,14 +1022,14 @@ class ScannerTests(unittest.TestCase):
         self.harness.execute("Deliver({{fullName='External',level=5}})")
         self.check("NS.Scanner:GetStatus().pendingLateResponse and NS.Scanner:GetStatus().incomplete")
         self.check("NS.Scanner:GetStatus().running and not NS.Scanner:GetStatus().blockedUntilReload")
-        self.check("BatataScanner.CountPlayers()==0 and LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE')")
+        self.check("Batata_Scanner.CountPlayers()==0 and LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE')")
         self.harness.click("assert(not NS.Scanner:Start())")
         self.check("#whoCalls==2")
         self.harness.advance(10)
         self.check("#whoCalls==2")
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
         self.harness.execute("Deliver({{fullName='Fresh',level=5}})")
-        self.check("#whoCalls==3 and whoCalls[3]==whoCalls[1] and BatataScanner.CountPlayers()==1")
+        self.check("#whoCalls==3 and whoCalls[3]==whoCalls[1] and Batata_Scanner.CountPlayers()==1")
 
     def test_native_query_before_scanning_must_finish_first(self):
         """Verifies that native query before scanning must finish first."""
@@ -1038,13 +1038,13 @@ class ScannerTests(unittest.TestCase):
         self.harness.execute("Deliver({{fullName='External',level=5}})")
         self.harness.advance(6)
         self.harness.click("assert(NS.Scanner:Start())")
-        self.check("#whoCalls==2 and BatataScanner.CountPlayers()==0")
+        self.check("#whoCalls==2 and Batata_Scanner.CountPlayers()==0")
 
     def test_mismatched_response_discards_the_entire_batch(self):
         """Verifies that mismatched response discards the entire batch."""
         self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=10}))")
         self.harness.execute("Deliver({{fullName='Valid',level=5},{fullName='Wrong',level=60}})")
-        self.check("BatataScanner.CountPlayers()==0 and NS.Scanner:GetStatus().paused")
+        self.check("Batata_Scanner.CountPlayers()==0 and NS.Scanner:GetStatus().paused")
         self.check("NS.Scanner:GetStatus().completedQueries==0")
 
     def test_unreadable_rows_and_guilds_preserve_unknown_state(self):
@@ -1054,8 +1054,8 @@ class ScannerTests(unittest.TestCase):
             Deliver({{fullName="Readable",level=5,fullGuildName={secret=true}},
                      {fullName={secret=true},level=5}, {inaccessible=true}})
         ''')
-        self.check("BatataScanner.CountPlayers()==1 and NS.Scanner:GetStatus().incomplete")
-        self.check("BatataScanner.GetPlayer('Readable').guild==nil")
+        self.check("Batata_Scanner.CountPlayers()==1 and NS.Scanner:GetStatus().incomplete")
+        self.check("Batata_Scanner.GetPlayer('Readable').guild==nil")
 
     def test_partial_native_choices_never_claim_full_coverage(self):
         """Verifies that partial native choices never claim full coverage."""
@@ -1080,7 +1080,7 @@ class ScannerTests(unittest.TestCase):
                 self.check(f"NS.Scanner:GetStatus().inCombat=={str(combat).lower()}")
                 self.check(f"NS.Scanner:GetStatus().inBattleground=={str(instance_kind == 'pvp').lower()}")
                 self.harness.click("assert(not NS.Scanner:Continue()); assert(not NS.Scanner:Restart())")
-                self.harness.click("SlashCmdList.BATATASCANNER('next'); SlashCmdList.BATATASCANNER('scan')")
+                self.harness.click("SlashCmdList.BATATA_SCANNER('next'); SlashCmdList.BATATA_SCANNER('scan')")
                 self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
                 self.check("#whoCalls==0 and not NS.Scanner:GetStatus().awaiting")
                 self.check("LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE') and not whoRouting")
@@ -1104,7 +1104,7 @@ class ScannerTests(unittest.TestCase):
         self.harness = Harness(setup=SCANNER_SETUP + 'combatLockdown=true; instanceKind="pvp"')
         self.harness.execute('''
             local notifications=0
-            BatataScanner.RegisterCallback("SCAN_STATUS_CHANGED",function() notifications=notifications+1 end)
+            Batata_Scanner.RegisterCallback("SCAN_STATUS_CHANGED",function() notifications=notifications+1 end)
             Emit("PLAYER_ENTERING_WORLD",true,false)
             combatLockdown=false
             Emit("PLAYER_REGEN_ENABLED")
@@ -1144,7 +1144,7 @@ class ScannerTests(unittest.TestCase):
             assert(NS.Scanner:GetStatus().awaiting)
             Deliver({{fullName="Owned",level=5}})
             assert(NS.Scanner:GetStatus().completedQueries==1 and NS.Scanner:GetStatus().remainingQueries==1)
-            assert(BatataScanner.CountPlayers()==1 and NS.Scanner:GetStatus().cooldown==6)
+            assert(Batata_Scanner.CountPlayers()==1 and NS.Scanner:GetStatus().cooldown==6)
             assert(LFGWhoListFrame:IsEventRegistered("WHO_LIST_UPDATE") and not whoRouting)
             Advance(6)
             Click(function() assert(not NS.Scanner:Continue()) end)
@@ -1211,7 +1211,7 @@ class ScannerTests(unittest.TestCase):
             Emit("PLAYER_TARGET_CHANGED")
             Click(function() assert(not NS.Scanner:Start()) end)
             Advance(1)
-            assert(BatataScanner.GetPlayer("Passive Observer").level==30)
+            assert(Batata_Scanner.GetPlayer("Passive Observer").level==30)
             assert(#whoCalls==0 and NS.Scanner:GetStatus().inCombat and NS.Scanner:GetStatus().inBattleground)
         ''')
 
@@ -1221,8 +1221,8 @@ class ScannerTests(unittest.TestCase):
         self.harness.click("assert(not NS.Scanner:Start({minLevel=1,maxLevel=20}))")
         self.check("NS.Scanner:GetStatus().running and NS.Scanner:GetStatus().remainingQueries==2")
         self.harness.click("assert(not NS.Scanner:Restart())")
-        self.harness.click("SlashCmdList.BATATASCANNER('next')")
-        self.harness.click("SlashCmdList.BATATASCANNER('scan')")
+        self.harness.click("SlashCmdList.BATATA_SCANNER('next')")
+        self.harness.click("SlashCmdList.BATATA_SCANNER('scan')")
         self.check("#whoCalls==0 and not NS.Scanner:GetStatus().awaiting")
         self.check("LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE') and not whoRouting")
 
@@ -1231,8 +1231,8 @@ class ScannerTests(unittest.TestCase):
         self.harness.execute("LFGWhoListFrame:Show()")
         self.harness.click("assert(not NS.Scanner:Start({minLevel=1,maxLevel=20}))")
         self.harness.execute("Emit('PLAYER_LOGOUT')")
-        self.check("BatataScanner_DB.scanner.running and not BatataScanner_DB.scanner.paused")
-        self.check("BatataScanner_DB.scanner.nativeWhoOpen==nil")
+        self.check("Batata_Scanner_DB.scanner.running and not Batata_Scanner_DB.scanner.paused")
+        self.check("Batata_Scanner_DB.scanner.nativeWhoOpen==nil")
         self.reload()
         self.check("NS.Scanner:GetStatus().running and not NS.Scanner:GetStatus().nativeWhoOpen")
         self.harness.advance(30)
@@ -1264,7 +1264,7 @@ class ScannerTests(unittest.TestCase):
         self.harness.execute("LFGWhoListFrame:Show(); C_FriendList.SetWhoToUi(true)")
         self.check("NS.Scanner:GetStatus().awaiting and NS.Scanner:GetStatus().nativeWhoOpen")
         self.harness.execute("Deliver({{fullName='Owned',level=5}})")
-        self.check("BatataScanner.CountPlayers()==1 and NS.Scanner:GetStatus().completedQueries==1")
+        self.check("Batata_Scanner.CountPlayers()==1 and NS.Scanner:GetStatus().completedQueries==1")
         self.check("LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE') and whoRouting")
         self.harness.advance(6)
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
@@ -1316,7 +1316,7 @@ class ScannerTests(unittest.TestCase):
                 self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
                 self.check("#whoCalls==1 and NS.Scanner:GetStatus().externalQueryPending")
                 self.harness.execute("Deliver({{fullName='External',level=5}})")
-                self.check("not NS.Scanner:GetStatus().externalQueryPending and BatataScanner.CountPlayers()==0")
+                self.check("not NS.Scanner:GetStatus().externalQueryPending and Batata_Scanner.CountPlayers()==0")
                 if not hide_before_reply:
                     self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
                     self.check("#whoCalls==1 and NS.Scanner:GetStatus().nativeWhoOpen")
@@ -1340,7 +1340,7 @@ class ScannerTests(unittest.TestCase):
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
         self.harness.execute("Deliver({{fullName='OtherExternal',level=5}})")
         self.check("NS.Scanner:GetStatus().pendingLateResponse and #whoCalls==2")
-        self.check("BatataScanner.CountPlayers()==0")
+        self.check("Batata_Scanner.CountPlayers()==0")
         self.harness.advance(5)
         self.check("not NS.Scanner:GetStatus().pendingLateResponse and #whoCalls==2")
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
@@ -1393,8 +1393,8 @@ class ScannerTests(unittest.TestCase):
             Deliver({{fullName="Zero",level=0},{fullName="Infinite",level=math.huge},
                      {fullName="Fraction",level=1.5},{fullName="Valid",level=5}})
         ''')
-        self.check("BatataScanner.CountPlayers()==1 and NS.Scanner:GetStatus().incomplete")
-        self.check("BatataScanner.GetPlayer('Valid')~=nil")
+        self.check("Batata_Scanner.CountPlayers()==1 and NS.Scanner:GetStatus().incomplete")
+        self.check("Batata_Scanner.GetPlayer('Valid')~=nil")
 
     def test_invalid_result_counts_pause_without_accepting_a_response(self):
         """Verifies that invalid result counts pause without accepting a response."""
@@ -1404,7 +1404,7 @@ class ScannerTests(unittest.TestCase):
             Deliver({{fullName="Player",level=5}})
         ''')
         self.check("NS.Scanner:GetStatus().paused and NS.Scanner:GetStatus().completedQueries==0")
-        self.check("BatataScanner.CountPlayers()==0")
+        self.check("Batata_Scanner.CountPlayers()==0")
 
     def test_native_routing_changes_during_wait_are_preserved(self):
         """Verifies that native routing changes during wait are preserved."""
@@ -1427,7 +1427,7 @@ class ScannerTests(unittest.TestCase):
         self.harness.advance(6)
         self.harness.click("assert(NS.Scanner:Continue())")
         self.harness.execute("Deliver({{fullName='FIRST LAST',level=5,raceStr='Dwarf'}})")
-        self.check("NS.Scanner:GetStatus().newPlayers==1 and BatataScanner.CountPlayers()==1")
+        self.check("NS.Scanner:GetStatus().newPlayers==1 and Batata_Scanner.CountPlayers()==1")
 
     def test_sweep_query_budget_is_bounded_and_reported(self):
         """Verifies that sweep query budget is bounded and reported."""

@@ -1,4 +1,4 @@
--- BatataScanner: GuildHQ's scanner browser.
+-- Batata Scanner: GuildHQ's scanner browser.
 -- Addon name and private namespace supplied by the TOC loader.
 local ADDON,
     NS = ...
@@ -349,7 +349,7 @@ function Panel:Refresh()
         return
     end
     RefreshClassOptions()
-    local status    = BatataScanner.GetScanStatus()
+    local status    = Batata_Scanner.GetScanStatus()
     local pausable  = status.running and not status.paused
     self.scanButton.playIcon:SetShown(not pausable)
     for iconIndex, icon in ipairs(self.scanButton.pauseIcon) do
@@ -485,7 +485,7 @@ end
 -- Builds the scan settings dialog and the footer button that toggles it.
 -- @param mainFrame Main window used to anchor the settings dialog.
 local function BuildSettings(mainFrame)
-    local dialog = Widgets.SettingsDialog("BatataScanner_ScanSettings", 300, 400)
+    local dialog = Widgets.SettingsDialog("Batata_Scanner_ScanSettings", 300, 400)
     Panel.scanSettings = dialog
     dialog.doneButton:SetText("Save")
     local classNames    = NS.Scanner:ClassChoices()

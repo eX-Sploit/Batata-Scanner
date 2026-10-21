@@ -1,4 +1,4 @@
--- BatataScanner: bounded same-faction proximity observations; no server queries.
+-- Batata Scanner: bounded same-faction proximity observations; no server queries.
 -- Addon folder name and the shared private namespace supplied by the client.
 local ADDON,
     NS = ...

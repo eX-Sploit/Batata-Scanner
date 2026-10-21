@@ -1,6 +1,6 @@
 ---
 name: wow-forever-ui
-description: 'Implement or debug BatataScanner frames, scan controls, census tables, scrolling, tooltips, settings, and secret-aware displays on WoW Forever.'
+description: 'Implement or debug Batata Scanner frames, scan controls, census tables, scrolling, tooltips, settings, and secret-aware displays on WoW Forever.'
 ---
 
 # WoW Forever scanner UI
@@ -23,7 +23,7 @@ Bind scan controls to the existing state machine. A click dispatches one permitt
 
 ## Restricted values and settings
 
-Check accessibility before formatting/sorting external data. A supported setter may accept a secret value without permitting Lua computations on it; reading text back from a widget is not declassification. BatataScanner's stored ordinary records must come through the observation access checks.
+Check accessibility before formatting/sorting external data. A supported setter may accept a secret value without permitting Lua computations on it; reading text back from a widget is not declassification. Batata Scanner's stored ordinary records must come through the observation access checks.
 
 Register settings after SavedVariables initialization and bind the loaded table or explicit internal accessors. Keep settings changes internal to the addon UI; the public consumer API must not gain setters. Use stable addon-specific menu/popup identities and reset tooltips on row reuse/hide.
 

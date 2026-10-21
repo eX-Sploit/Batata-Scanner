@@ -127,7 +127,7 @@ class CensusUIContracts(unittest.TestCase):
             assert(RaceChart("Orc").total==9)
             assert(panel.guildStats.metrics[1].value:GetText()=="9 (100%)")
             assert(panel.summary:GetText():find("Unique players: |cffffffff9|r",1,true))
-            assert(BatataScanner.GetCensus().total==10, "shared records and public API stay unchanged")
+            assert(Batata_Scanner.GetCensus().total==10, "shared records and public API stay unchanged")
             NS.context.faction=nil
             panel:Refresh()
             assert(panel.snapshot.total==0, "missing faction must not fall back to all factions")
@@ -169,12 +169,12 @@ class CensusUIContracts(unittest.TestCase):
             Observe("Two","WARRIOR","Human","Alpha")
             panel:Refresh()
             ClickWidget(panel.navigation.links[3])
-            local original=BatataScanner.GetCensus
+            local original=Batata_Scanner.GetCensus
             censusCalls=0
-            BatataScanner=setmetatable({GetCensus=function(...)
+            Batata_Scanner=setmetatable({GetCensus=function(...)
                 censusCalls=censusCalls+1
                 return original(...)
-            end},{__index=BatataScanner})
+            end},{__index=Batata_Scanner})
             ClickWidget(panel.toggles.guild[1])
             local rows=VisibleRows(panel.guildBox)
             assert(rows[1].label:GetText()=="Alpha")
@@ -213,15 +213,15 @@ class CensusUIContracts(unittest.TestCase):
             assert(charts.Dwarf.total==1 and #charts.Dwarf.entries==6)
             assert(charts.Unknown.entries[1].token=="WARRIOR")
             assert(charts["Unusual Race"].entries[1].token=="MAGE")
-            local original=BatataScanner.GetCensus
+            local original=Batata_Scanner.GetCensus
             censusCalls=0
-            BatataScanner=setmetatable({GetCensus=function(...)
+            Batata_Scanner=setmetatable({GetCensus=function(...)
                 censusCalls=censusCalls+1
                 return original(...)
-            end},{__index=BatataScanner})
+            end},{__index=Batata_Scanner})
             panel:Draw()
             assert(censusCalls==0)
-            assert(BatataScanner.GetCensus().total==4)
+            assert(Batata_Scanner.GetCensus().total==4)
             assert(#errors==0)
         ''')
 
@@ -246,7 +246,7 @@ class CensusUIContracts(unittest.TestCase):
                 assert(not hidden[option.value], "opposing race must not reappear through filters or observations")
             end
             assert(RaceChart("Human").total==1)
-            assert(BatataScanner.GetPlayer("Opposing")~=nil, "presentation must not delete stored observations")
+            assert(Batata_Scanner.GetPlayer("Opposing")~=nil, "presentation must not delete stored observations")
             NS.context.faction="Horde"
             C_FriendList.GetWhoRaceFilters=function() return {{name="Human"},{name="Orque"}} end
             panel:Refresh()
@@ -268,7 +268,7 @@ class CensusUIContracts(unittest.TestCase):
             assert(#chart.entries==8 and chart.entries[1].token=="DRUID")
             assert(chart.total==1 and #chart.slices==1)
             assert(chart.slices[1].entry.count==1)
-            assert(BatataScanner.GetPlayer("Unexpected").class=="Druid")
+            assert(Batata_Scanner.GetPlayer("Unexpected").class=="Druid")
             assert(#errors==0)
         ''')
 
@@ -450,7 +450,7 @@ class CensusUIContracts(unittest.TestCase):
                 chart.ring.scripts.OnLeave(chart.ring)
             end
             assert(not GameTooltip:IsShown() or GameTooltip.owner==nil)
-            assert(BatataScanner.GetCensus().total==0 and #whoCalls==0 and #errors==0)
+            assert(Batata_Scanner.GetCensus().total==0 and #whoCalls==0 and #errors==0)
         ''')
 
     def test_donut_grid_fits_both_window_sizes_with_all_races_and_reuses_artwork(self):
@@ -690,7 +690,7 @@ class CensusUIContracts(unittest.TestCase):
             Observe("One","MAGE","Human","Alpha")
             panel:Refresh()
             panel.classChart.entries[1].count=999
-            assert(BatataScanner.GetCensus().byClass.Mage==1)
+            assert(Batata_Scanner.GetCensus().byClass.Mage==1)
             local original=NS.Store.GetCensusOverview
             censusCalls=0
             NS.Store.GetCensusOverview=function(...)
@@ -790,12 +790,12 @@ class CensusUIContracts(unittest.TestCase):
             ClickWidget(panel.navigation.links[3])
             assert(not GameTooltip:IsShown() and not panel.levelArea:IsVisible())
             ClickWidget(panel.navigation.links[2])
-            local original=BatataScanner.GetCensus
+            local original=Batata_Scanner.GetCensus
             censusCalls=0
-            BatataScanner=setmetatable({GetCensus=function(...)
+            Batata_Scanner=setmetatable({GetCensus=function(...)
                 censusCalls=censusCalls+1
                 return original(...)
-            end},{__index=BatataScanner})
+            end},{__index=Batata_Scanner})
             panel:Draw()
             assert(censusCalls==0 and panel.levelBars[10]==bar)
             bar.scripts.OnEnter(bar)
@@ -821,7 +821,7 @@ class CensusUIContracts(unittest.TestCase):
             panel:Refresh()
             assert(not panel.noLevels:IsShown() and panel.levelBars[25].count==1)
             assert(panel.levelUnknown:GetText()=="Unknown level: 1 (50%)")
-            assert(BatataScanner.GetCensus().total==2 and #errors==0)
+            assert(Batata_Scanner.GetCensus().total==2 and #errors==0)
         ''')
 
     def test_level_chart_resizes_extends_range_and_reuses_bars_without_overlapping_labels(self):

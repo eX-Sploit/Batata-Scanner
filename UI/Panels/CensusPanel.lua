@@ -1,4 +1,4 @@
--- BatataScanner: the scanner census in GuildHQ's native table presentation.
+-- Batata Scanner: the scanner census in GuildHQ's native table presentation.
 -- Addon name and private namespace supplied by the TOC loader.
 local ADDON,
     NS = ...
@@ -859,7 +859,7 @@ end
 -- Fetches a new census snapshot, updates the summary and race options, then redraws.
 -- @param deferDataChanges Reuse an existing same-faction snapshot until the next periodic refresh.
 function Panel:Refresh(deferDataChanges)
-    if not (self.mainFrame and self.mainFrame:IsShown() and BatataScanner.IsReady()) then
+    if not (self.mainFrame and self.mainFrame:IsShown() and Batata_Scanner.IsReady()) then
         return
     end
     if
@@ -1087,7 +1087,7 @@ function Panel:Build(root, mainFrame)
     local guildSortWidth
     self.guildBox, self.guildScroll, guildSortWidth = CreateChart(
         guildPage,
-        "BatataScanner_GuildScroll",
+        "Batata_Scanner_GuildScroll",
         "guild",
         "Guild",
         "Population",

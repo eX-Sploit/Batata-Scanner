@@ -1,4 +1,4 @@
--- BatataScanner: welcome overview and quick start, adapted from GuildHQ.
+-- Batata Scanner: welcome overview and quick start, adapted from GuildHQ.
 -- Addon folder name and the private namespace table shared by all addon files.
 local ADDON,
     NS = ...
@@ -15,7 +15,7 @@ local CONTENT = {
     {
         tab       = "Overview",
         layout    = "features",
-        title     = "BatataScanner",
+        title     = "Batata Scanner",
         subtitle  = "A handy field journal for the players you meet on your WoW Forever adventures.",
         logo      = true,
         footer = "Your collection follows every character on this account. Scanner shows players from the faction you're playing now.",

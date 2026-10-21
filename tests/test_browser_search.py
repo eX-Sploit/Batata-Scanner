@@ -32,9 +32,9 @@ class BrowserSearchTests(unittest.TestCase):
             local record=request:GetPlayer(1000)
             assert(record.name=="Player1000" and copies==1)
             record.guild="Changed"
-            assert(BatataScanner.GetPlayer("Player1000").guild=="Guild")
+            assert(Batata_Scanner.GetPlayer("Player1000").guild=="Guild")
             assert(record.sources==nil)
-            assert(BatataScanner.CreateSearch==nil)
+            assert(Batata_Scanner.CreateSearch==nil)
         ''')
 
     def test_search_retains_at_most_one_thousand_results_and_marks_truncation(self):
@@ -49,7 +49,7 @@ class BrowserSearchTests(unittest.TestCase):
             assert(request:GetPlayer(1).name=="Player0001")
             assert(request:GetPlayer(1000).name=="Player1000")
             assert(request:GetPlayer(1001)==nil)
-            assert(BatataScanner.CountPlayers()==1200, "the browser cap must not delete stored players")
+            assert(Batata_Scanner.CountPlayers()==1200, "the browser cap must not delete stored players")
         ''')
 
     def test_cold_order_preparation_is_deferred_bounded_and_cached(self):
@@ -94,7 +94,7 @@ class BrowserSearchTests(unittest.TestCase):
             end
             for fieldIndex,field in ipairs({"name","level","class","race","guild","zone","faction","firstSeen","lastSeen"}) do
                 for directionIndex,descending in ipairs({false,true}) do
-                    local expected=BatataScanner.FindPlayers(nil,{sort=field,descending=descending,limit=500})
+                    local expected=Batata_Scanner.FindPlayers(nil,{sort=field,descending=descending,limit=500})
                     NS.db.players=NS.Store:Load(NS.db.players)
                     local request=assert(NS.Store:CreateSearch("",field,descending))
                     while not request:Step() do end
@@ -155,13 +155,13 @@ class BrowserSearchTests(unittest.TestCase):
             for playerIndex=1,1000 do
                 NS.Store:Observe({name=string.format("Player%06d",playerIndex),guild="Original"})
             end
-            BatataScanner.FindPlayers(nil,{sort="name"})
+            Batata_Scanner.FindPlayers(nil,{sort="name"})
             local request=assert(NS.Store:CreateSearch("", "name", false, {guild="Original"}))
             assert(not request:Step())
             NS.Store:Observe({name="Player000999",guild="Changed"})
             while not request:Step() do end
             assert(request.total==1000 and request:GetPlayer(999).guild=="Original")
-            local page=BatataScanner.FindPlayers({guild="Changed"},{sort="name"})
+            local page=Batata_Scanner.FindPlayers({guild="Changed"},{sort="name"})
             assert(page.total==1 and page.players[1].name=="Player000999")
         ''')
 
@@ -171,13 +171,13 @@ class BrowserSearchTests(unittest.TestCase):
             NS.Store:Observe({name="Alice",level=10})
             NS.Store:Observe({name="Bob",level=20})
             for fieldIndex,field in ipairs({"name","lastSeen"}) do
-                BatataScanner.FindPlayers(nil,{sort=field})
+                Batata_Scanner.FindPlayers(nil,{sort=field})
             end
             epoch=epoch+1
             NS.Store:Observe({name="Alice"})
             assert(NS.Store:CreateSearch("","name").limit==2)
             assert(NS.Store:CreateSearch("","lastSeen").limit==0)
-            BatataScanner.FindPlayers(nil,{sort="level"})
+            Batata_Scanner.FindPlayers(nil,{sort="level"})
             assert(NS.Store:CreateSearch("","level").limit==2)
             NS.Store:Observe({name="Alice",level=30})
             assert(NS.Store:CreateSearch("","level").limit==0)
@@ -191,10 +191,10 @@ class BrowserSearchTests(unittest.TestCase):
         self.harness.execute('''
             NS.Store:Observe({name="Alice",level=20})
             NS.Store:Observe({name="Bob",level=10})
-            BatataScanner.FindPlayers(nil,{sort="name"})
-            BatataScanner.FindPlayers(nil,{sort="level"})
+            Batata_Scanner.FindPlayers(nil,{sort="name"})
+            Batata_Scanner.FindPlayers(nil,{sort="level"})
             local active=NS.Store:CreateSearch("", "level")
-            BatataScanner.FindPlayers(nil,{sort="name"})
+            Batata_Scanner.FindPlayers(nil,{sort="name"})
             local third=NS.Store:CreateSearch("", "guild")
             while not third:Step() do end
             assert(NS.Store:CreateSearch("","level").limit==0)
@@ -202,7 +202,7 @@ class BrowserSearchTests(unittest.TestCase):
             assert(NS.Store:CreateSearch("","guild").limit==2)
             while not active:Step() do end
             assert(active:GetPlayer(1).name=="Bob" and active.total==2)
-            BatataScanner.FindPlayers(nil,{sort="race"})
+            Batata_Scanner.FindPlayers(nil,{sort="race"})
             assert(NS.Store:CreateSearch("","name").limit==0)
             assert(NS.Store:CreateSearch("","guild").limit==2)
             assert(NS.Store:CreateSearch("","race").limit==2)
@@ -228,7 +228,7 @@ class BrowserSearchTests(unittest.TestCase):
                 local player=request:GetPlayer(resultIndex)
                 assert(player.lastSeen==snapshotTime and player.level==30)
             end
-            assert(BatataScanner.GetPlayer("Player000001").level==60)
+            assert(Batata_Scanner.GetPlayer("Player000001").level==60)
         ''')
 
     def test_completed_search_releases_nonmatches_and_cancel_releases_matches(self):

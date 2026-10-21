@@ -19,7 +19,7 @@ class UIContracts(unittest.TestCase):
     def setUp(self):
         """Creates a fresh test fixture before each test."""
         self.client = Harness(setup=UI_SUPPORT +
-            'BatataScanner_DB={schemaVersion=1,settings={queryInterval=5}}', modules=MODULES)
+            'Batata_Scanner_DB={schemaVersion=1,settings={queryInterval=5}}', modules=MODULES)
 
     def check(self, source):
         """Runs a Lua assertion or statement in the current test fixture."""
@@ -28,12 +28,12 @@ class UIContracts(unittest.TestCase):
     def test_shell_uses_right_icon_tabs_and_original_window_dimensions(self):
         """Verifies that shell uses right icon tabs and original window dimensions."""
         self.check(r'''
-            assert(BatataScanner_MainFrame==nil)
+            assert(Batata_Scanner_MainFrame==nil)
             NS.UI:Show()
             local frame=NS.UI.frame
-            assert(frame==BatataScanner_MainFrame and frame:IsShown())
+            assert(frame==Batata_Scanner_MainFrame and frame:IsShown())
             assert(frame.template=="PortraitFrameTemplateMinimizable")
-            assert(frame:GetTitleText():GetText()=="BatataScanner")
+            assert(frame:GetTitleText():GetText()=="Batata Scanner")
             assert(frame:GetHeight()==480 and frame:GetWidth()>=742)
             assert(#frame.Tabs==3)
             local first,second,third=frame.Tabs[1],frame.Tabs[2],frame.Tabs[3]
@@ -56,7 +56,7 @@ class UIContracts(unittest.TestCase):
             assert(frame:IsShown())
             local registrations=0
             for _,name in ipairs(UISpecialFrames) do
-                if name=="BatataScanner_MainFrame" or name=="BatataScanner_Dismiss" then
+                if name=="Batata_Scanner_MainFrame" or name=="Batata_Scanner_Dismiss" then
                     registrations=registrations+1
                 end
             end
@@ -123,9 +123,9 @@ class UIContracts(unittest.TestCase):
     def test_minimap_button_toggles_window_and_saves_dragged_angle(self):
         """Verifies that minimap button toggles window and saves dragged angle."""
         self.check(r'''
-            local button=BatataScanner_MinimapButton
+            local button=Batata_Scanner_MinimapButton
             assert(button and button:GetParent()==Minimap and NS.db.minimap.angle==225)
-            assert(BatataScanner_MainFrame==nil)
+            assert(Batata_Scanner_MainFrame==nil)
             ClickWidget(button)
             assert(NS.UI.frame:IsShown())
             ClickWidget(button)
@@ -192,16 +192,16 @@ class UIContracts(unittest.TestCase):
             NS.UI:SelectPage("Scanner")
             local frame=NS.UI.frame
             local panel=NS.ScannerPanel
-            assert(panel.searching and BatataScanner_Dismiss:IsShown())
-            BatataScanner_Dismiss:Hide()
+            assert(panel.searching and Batata_Scanner_Dismiss:IsShown())
+            Batata_Scanner_Dismiss:Hide()
             assert(frame:IsShown() and not panel.searching)
             Advance(1)
-            assert(not panel.searching and not BatataScanner_Dismiss:IsShown())
+            assert(not panel.searching and not Batata_Scanner_Dismiss:IsShown())
             ClickWidget(panel.scanSettingsButton)
-            assert(panel.scanSettings:IsShown() and BatataScanner_Dismiss:IsShown())
-            BatataScanner_Dismiss:Hide()
+            assert(panel.scanSettings:IsShown() and Batata_Scanner_Dismiss:IsShown())
+            Batata_Scanner_Dismiss:Hide()
             assert(frame:IsShown() and not panel.scanSettings:IsShown())
-            assert(#UISpecialFrames==1 and UISpecialFrames[1]=="BatataScanner_MainFrame")
+            assert(#UISpecialFrames==1 and UISpecialFrames[1]=="Batata_Scanner_MainFrame")
             frame:Hide()
             assert(not frame:IsShown() and #whoCalls==0 and #errors==0)
         ''')
@@ -212,7 +212,7 @@ class UIContracts(unittest.TestCase):
             NS.UI:Show()
             NS.UI:SelectPage("Scanner")
             local panel=NS.ScannerPanel
-            assert(BatataScanner.GetScanStatus().running and panel.scanStatus:GetText()=="Scanning")
+            assert(Batata_Scanner.GetScanStatus().running and panel.scanStatus:GetText()=="Scanning")
             ClickWidget(panel.stopBtn)
             Advance(0.2)
             assert(panel.scanStatus:GetText()=="Stopped")
@@ -239,18 +239,18 @@ class UIContracts(unittest.TestCase):
             assert(NS.db.settings.queryInterval==6 and #NS.db.settings.scanClasses==1)
             assert(NS.db.settings.scanClasses[1]=="Mage")
             assert(#whoCalls==1 and whoCalls[1]=='c-"Mage" 1-10', "Save restarts the changed sweep")
-            assert(BatataScanner.GetScanStatus().awaiting)
+            assert(Batata_Scanner.GetScanStatus().awaiting)
             ClickWidget(panel.scanSettingsButton)
             assert(panel.minLevel:GetText()=="1" and panel.maxLevel:GetText()=="60")
             assert(panel.speedDropdown:GetValue()==6 and not panel.classChecks[2]:GetChecked())
             ClickWidget(panel.scanSettings.doneButton)
             assert(not panel.scanSettings:IsShown() and #whoCalls==1, "unchanged scope keeps the sweep")
             ClickWidget(panel.scanButton)
-            assert(BatataScanner.GetScanStatus().paused)
+            assert(Batata_Scanner.GetScanStatus().paused)
             Advance(1)
             assert(#whoCalls==1)
             ClickWidget(panel.stopBtn)
-            assert(not BatataScanner.GetScanStatus().running)
+            assert(not Batata_Scanner.GetScanStatus().running)
             assert(#whoCalls==1 and #errors==0)
         ''')
 
@@ -279,7 +279,7 @@ class UIContracts(unittest.TestCase):
                     assert(NS.Scanner:GetStatus().plannedQueries==planned and #whoCalls==0)
                     ClickWidget(panel.scanSettingsButton)
                     assert(panel.speedDropdown:GetValue()==expectedInterval)
-                    BatataScanner_Dismiss:Hide()
+                    Batata_Scanner_Dismiss:Hide()
                     Click(function() assert(NS.Scanner:Continue()) end)
                     Deliver({})
                     assert(NS.Scanner:GetStatus().cooldown==expectedInterval)
@@ -291,10 +291,10 @@ class UIContracts(unittest.TestCase):
                     assert(#whoCalls==2 and #errors==0)
                 ''')
                 saved_interval = self.client.execute(
-                    "Emit('PLAYER_LOGOUT'); return BatataScanner_DB.settings.queryInterval")
+                    "Emit('PLAYER_LOGOUT'); return Batata_Scanner_DB.settings.queryInterval")
                 self.assertEqual(saved_interval, interval)
                 restored = Harness(setup=UI_SUPPORT +
-                    f'BatataScanner_DB={{schemaVersion=1,settings={{queryInterval={saved_interval}}}}}',
+                    f'Batata_Scanner_DB={{schemaVersion=1,settings={{queryInterval={saved_interval}}}}}',
                     modules=MODULES)
                 restored.execute('''
                     NS.UI:Show()
@@ -314,7 +314,7 @@ class UIContracts(unittest.TestCase):
                 NS.db.settings.queryInterval=case[1]
                 ClickWidget(panel.scanSettingsButton)
                 assert(panel.speedDropdown:GetValue()==case[2])
-                BatataScanner_Dismiss:Hide()
+                Batata_Scanner_Dismiss:Hide()
                 assert(NS.db.settings.queryInterval==case[1])
                 ClickWidget(panel.scanSettingsButton)
                 ClickWidget(panel.scanSettings.doneButton)
@@ -346,7 +346,7 @@ class UIContracts(unittest.TestCase):
             ClickWidget(panel.scanSettingsButton)
             assert(dropdown:GetValue()=="reversed")
             ClickWidget(panel.scanSettings.doneButton)
-            assert(#whoCalls==1 and BatataScanner.GetScanStatus().currentQuery=="41-50")
+            assert(#whoCalls==1 and Batata_Scanner.GetScanStatus().currentQuery=="41-50")
             ClickWidget(panel.scanSettingsButton)
             dropdown:Select(1)
             ClickWidget(panel.scanSettings.doneButton)
@@ -372,7 +372,7 @@ class UIContracts(unittest.TestCase):
             ClickWidget(panel.scanButton)
             Emit("CHAT_MSG_SYSTEM","You must wait a moment longer before using /who again")
             NS.UI:Refresh()
-            assert(panel.scanStatus:GetText()=="Scanning" and BatataScanner.GetScanStatus().cooldown==12)
+            assert(panel.scanStatus:GetText()=="Scanning" and Batata_Scanner.GetScanStatus().cooldown==12)
             assert(panel.scanButton:IsEnabled() and panel.stopBtn:IsEnabled())
             assert(not panel.scanButton.playIcon:IsShown() and panel.scanButton.pauseIcon[1]:IsShown())
             GameTooltip:ClearLines()
@@ -393,7 +393,7 @@ class UIContracts(unittest.TestCase):
             Advance(12.2)
             assert(panel.scanStatus:GetText()=="Stopped" and panel.scanButton:IsEnabled())
             ClickWidget(panel.scanButton)
-            assert(#whoCalls==3 and BatataScanner.GetScanStatus().awaiting and #errors==0)
+            assert(#whoCalls==3 and Batata_Scanner.GetScanStatus().awaiting and #errors==0)
         ''')
 
     def test_native_who_hold_follows_parent_visibility_and_tab_switches(self):
@@ -407,7 +407,7 @@ class UIContracts(unittest.TestCase):
             LFGWhoListFrame:SetParent(LFGParentFrame)
             LFGWhoListFrame:Show()
             assert(LFGWhoListFrame:IsShown() and not LFGWhoListFrame:IsVisible())
-            assert(not BatataScanner.GetScanStatus().nativeWhoOpen)
+            assert(not Batata_Scanner.GetScanStatus().nativeWhoOpen)
             LFGParentFrame:Show()
             Advance(0.2)
             assert(panel.scanStatus:GetText()=="Paused: Who")
@@ -417,7 +417,7 @@ class UIContracts(unittest.TestCase):
             assert(#whoCalls==0)
             LFGParentFrame:Hide()
             Advance(0.2)
-            assert(LFGWhoListFrame:IsShown() and not BatataScanner.GetScanStatus().nativeWhoOpen)
+            assert(LFGWhoListFrame:IsShown() and not Batata_Scanner.GetScanStatus().nativeWhoOpen)
             assert(panel.scanStatus:GetText()=="Scanning" and #whoCalls==0)
             LFGParentFrame:Show()
             Advance(0.2)
@@ -465,7 +465,7 @@ class UIContracts(unittest.TestCase):
             panel.scanStatusHint:GetScript("OnEnter")(panel.scanStatusHint)
             assert(table.concat(GameTooltip.lines," "):find("battleground",1,true))
             ClickWidget(panel.scanButton)
-            assert(BatataScanner.GetScanStatus().paused and panel.scanStatus:GetText()=="Paused")
+            assert(Batata_Scanner.GetScanStatus().paused and panel.scanStatus:GetText()=="Paused")
             assert(panel.scanButton.playIcon:IsShown() and not panel.scanButton:IsEnabled())
             instanceKind="none"
             Emit("ZONE_CHANGED_NEW_AREA")
@@ -473,7 +473,7 @@ class UIContracts(unittest.TestCase):
             assert(panel.scanStatus:GetText()=="Paused" and panel.scanButton:IsEnabled())
             assert(#whoCalls==0)
             ClickWidget(panel.scanButton)
-            assert(#whoCalls==1 and BatataScanner.GetScanStatus().awaiting and #errors==0)
+            assert(#whoCalls==1 and Batata_Scanner.GetScanStatus().awaiting and #errors==0)
         ''')
 
     def test_environment_holds_do_not_clear_the_native_who_hold(self):
@@ -530,7 +530,7 @@ class UIContracts(unittest.TestCase):
             LFGWhoListFrame:Show()
             Advance(0.2)
             ClickWidget(panel.scanButton)
-            assert(BatataScanner.GetScanStatus().paused and panel.scanStatus:GetText()=="Paused")
+            assert(Batata_Scanner.GetScanStatus().paused and panel.scanStatus:GetText()=="Paused")
             assert(panel.scanButton.playIcon:IsShown() and not panel.scanButton:IsEnabled())
             LFGWhoListFrame:Hide()
             Advance(0.2)
@@ -538,7 +538,7 @@ class UIContracts(unittest.TestCase):
             Click(function() WorldFrame:GetScript("OnMouseDown")(WorldFrame) end)
             assert(#whoCalls==0)
             ClickWidget(panel.scanButton)
-            assert(#whoCalls==1 and BatataScanner.GetScanStatus().awaiting and #errors==0)
+            assert(#whoCalls==1 and Batata_Scanner.GetScanStatus().awaiting and #errors==0)
         ''')
 
     def test_external_who_hold_explains_both_holds_and_preserves_manual_pause(self):
@@ -558,12 +558,12 @@ class UIContracts(unittest.TestCase):
             assert(tooltipText:find("Who list is open",1,true) and tooltipText:find("retry",1,true))
             assert(not tooltipText:lower():find("reload",1,true))
             ClickWidget(panel.scanButton)
-            assert(BatataScanner.GetScanStatus().paused and not panel.scanButton:IsEnabled())
+            assert(Batata_Scanner.GetScanStatus().paused and not panel.scanButton:IsEnabled())
             Deliver({})
             LFGWhoListFrame:Hide()
             Advance(6)
             assert(panel.scanStatus:GetText()=="Paused" and panel.scanButton:IsEnabled())
-            assert(#whoCalls==1 and BatataScanner.CountPlayers()==0)
+            assert(#whoCalls==1 and Batata_Scanner.CountPlayers()==0)
             ClickWidget(panel.scanButton)
             assert(#whoCalls==2 and #errors==0)
         ''')
@@ -580,7 +580,7 @@ class UIContracts(unittest.TestCase):
             ClickWidget(panel.scanSettings.doneButton)
             NS.UI:Refresh()
             assert(panel.scanStatus:GetText()=="Paused: Who" and #whoCalls==0)
-            assert(BatataScanner.GetScanStatus().running and not BatataScanner.GetScanStatus().awaiting)
+            assert(Batata_Scanner.GetScanStatus().running and not Batata_Scanner.GetScanStatus().awaiting)
             ClickWidget(panel.stopBtn)
             Advance(0.2)
             assert(panel.scanStatus:GetText()=="Stopped" and not panel.scanButton:IsEnabled())
@@ -644,15 +644,15 @@ class UIContracts(unittest.TestCase):
             Click(function() WorldFrame:GetScript("OnMouseDown")(WorldFrame) end)
             Click(function() C_FriendList.SendWho("5-5") end)
             Advance(0.2)
-            assert(panel.scanStatus:GetText()=="Retry in 10s" and not BatataScanner.GetScanStatus().blockedUntilReload)
+            assert(panel.scanStatus:GetText()=="Retry in 10s" and not Batata_Scanner.GetScanStatus().blockedUntilReload)
             Deliver({{fullName="External",level=5}})
             ClickWidget(panel.scanButton)
-            assert(panel.scanStatus:GetText()=="Cooldown: 10s" and BatataScanner.GetScanStatus().paused)
+            assert(panel.scanStatus:GetText()=="Cooldown: 10s" and Batata_Scanner.GetScanStatus().paused)
             assert(not panel.scanButton:IsEnabled())
             Advance(10)
             assert(panel.scanStatus:GetText()=="Paused" and panel.scanButton:IsEnabled())
             Click(function() WorldFrame:GetScript("OnMouseDown")(WorldFrame) end)
-            assert(#whoCalls==2 and BatataScanner.CountPlayers()==0)
+            assert(#whoCalls==2 and Batata_Scanner.CountPlayers()==0)
             ClickWidget(panel.scanButton)
             assert(#whoCalls==3 and whoCalls[3]==whoCalls[1] and #errors==0)
         ''')
@@ -663,7 +663,7 @@ class UIContracts(unittest.TestCase):
             NS.UI:Show()
             NS.UI:SelectPage("Scanner")
             local panel=NS.ScannerPanel
-            local planned=BatataScanner.GetScanStatus().plannedQueries
+            local planned=Batata_Scanner.GetScanStatus().plannedQueries
             ClickWidget(panel.scanSettingsButton)
             panel.overrideCheck:SetChecked(true)
             ClickWidget(panel.overrideCheck)
@@ -675,7 +675,7 @@ class UIContracts(unittest.TestCase):
             assert(not NS.db.settings.overrideDefaults and NS.db.settings.minLevel==1)
             assert(NS.db.settings.queryInterval==6 and NS.db.settings.scanClasses==nil)
             assert(NS.db.settings.scanBehavior=="random")
-            BatataScanner_Dismiss:Hide()
+            Batata_Scanner_Dismiss:Hide()
             assert(not panel.scanSettings:IsShown() and not NS.db.settings.overrideDefaults)
             assert(NS.db.settings.minLevel==1 and NS.db.settings.queryInterval==6)
             ClickWidget(panel.scanSettingsButton)
@@ -690,7 +690,7 @@ class UIContracts(unittest.TestCase):
             end
             ClickWidget(panel.scanSettings.doneButton)
             assert(panel.scanSettings:IsShown() and not NS.db.settings.overrideDefaults)
-            assert(BatataScanner.GetScanStatus().plannedQueries==planned)
+            assert(Batata_Scanner.GetScanStatus().plannedQueries==planned)
             assert(#whoCalls==0 and #errors==0)
         ''')
 
@@ -710,24 +710,24 @@ class UIContracts(unittest.TestCase):
             assert(#options==5 and options[1].label=="Never")
             assert(options[2].value==30 and options[3].value==90 and options[4].value==180 and options[5].value==365)
             panel.retentionDropdown:Select(2)
-            assert(NS.db.settings.retentionDays==0 and BatataScanner.CountPlayers()==2)
-            BatataScanner_Dismiss:Hide()
+            assert(NS.db.settings.retentionDays==0 and Batata_Scanner.CountPlayers()==2)
+            Batata_Scanner_Dismiss:Hide()
             assert(NS.db.settings.retentionDays==0 and panel.list:ItemCount()==2)
             ClickWidget(panel.scanSettingsButton)
             assert(panel.retentionDropdown:GetValue()==0)
             panel.retentionDropdown:Select(2)
             ClickWidget(panel.scanSettings.doneButton)
             Advance(0)
-            assert(NS.db.settings.retentionDays==30 and BatataScanner.GetPlayer("Old")==nil)
+            assert(NS.db.settings.retentionDays==30 and Batata_Scanner.GetPlayer("Old")==nil)
             assert(panel.list:ItemCount()==1 and panel.list.rows[1].item.name=="Current")
             assert(#whoCalls==0)
             ClickWidget(panel.scanSettingsButton)
             assert(panel.retentionDropdown:GetValue()==30)
             panel.retentionDropdown:Select(1)
             ClickWidget(panel.scanSettings.doneButton)
-            assert(NS.db.settings.retentionDays==0 and BatataScanner.CountPlayers()==1)
+            assert(NS.db.settings.retentionDays==0 and Batata_Scanner.CountPlayers()==1)
             Emit("PLAYER_LOGOUT")
-            assert(BatataScanner_DB.settings.retentionDays==0 and #BatataScanner_DB.players==1)
+            assert(Batata_Scanner_DB.settings.retentionDays==0 and #Batata_Scanner_DB.players==1)
             assert(#errors==0)
         ''')
 
@@ -752,7 +752,7 @@ class UIContracts(unittest.TestCase):
             NS.UI:SelectPage("Scanner")
             Advance(1)
             local panel=NS.ScannerPanel
-            local planned=BatataScanner.GetScanStatus().plannedQueries
+            local planned=Batata_Scanner.GetScanStatus().plannedQueries
             assert(panel.list:ItemCount()==3 and panel.factionCheck==nil)
             assert(NS.db.settings.myFactionOnly==false)
             panel.searchMinLevel:SetText("50")
@@ -778,10 +778,10 @@ class UIContracts(unittest.TestCase):
             Choose(panel.seenFilter,0)
             Advance(1)
             assert(NS.db.settings.searchSeenWithin==nil and panel.list:ItemCount()==2)
-            assert(#whoCalls==0 and BatataScanner.GetScanStatus().plannedQueries==planned)
+            assert(#whoCalls==0 and Batata_Scanner.GetScanStatus().plannedQueries==planned)
             Tab("Census")
             assert(NS.CensusPanel.snapshot.total==3)
-            assert(BatataScanner.GetCensus().total==4)
+            assert(Batata_Scanner.GetCensus().total==4)
             assert(#errors==0)
         ''')
 
@@ -813,7 +813,7 @@ class UIContracts(unittest.TestCase):
                     panel.input.scripts.OnEnterPressed(panel.input)
                     Advance(1)
                     assert(panel.list:ItemCount()==0 and panel.factionCheck==nil)
-                    assert(BatataScanner.CountPlayers()==2 and #whoCalls==0 and #errors==0)
+                    assert(Batata_Scanner.CountPlayers()==2 and #whoCalls==0 and #errors==0)
                 ''')
 
     def test_scanner_search_lists_first_seen_in_a_full_width_table_without_faction(self):
@@ -851,7 +851,7 @@ class UIContracts(unittest.TestCase):
             assert(classIcon:IsShown() and classIcon.texture:find("UI-CharacterCreate-Classes",1,true))
             assert(classIcon.texCoords[1]==0.25 and classIcon.texCoords[2]==0.5)
             ClickWidget(row)
-            assert(not row.sel:IsShown() and not BatataScanner_Dismiss:IsShown())
+            assert(not row.sel:IsShown() and not Batata_Scanner_Dismiss:IsShown())
             ClickWidget(panel.list.headers[1])
             Advance(0)
             assert(panel.list.rows[1].item.name=="Delta" and panel.list.rows[2].item.name=="Alpha")
@@ -859,7 +859,7 @@ class UIContracts(unittest.TestCase):
             Advance(0)
             assert(panel.list.rows[1].item.name=="Alpha")
             row.item.zone="Changed only in a result copy"
-            assert(BatataScanner.GetPlayer(row.item.name).zone=="Stormwind")
+            assert(Batata_Scanner.GetPlayer(row.item.name).zone=="Stormwind")
             panel.input:SetText("absent-player")
             panel.input.scripts.OnEnterPressed(panel.input)
             Advance(0)
@@ -873,7 +873,7 @@ class UIContracts(unittest.TestCase):
         for saved_preference in (False, True):
             with self.subTest(saved_preference=saved_preference):
                 self.client = Harness(setup=UI_SUPPORT +
-                    'BatataScanner_DB={schemaVersion=1,settings={myFactionOnly=' +
+                    'Batata_Scanner_DB={schemaVersion=1,settings={myFactionOnly=' +
                     str(saved_preference).lower() + '}}', modules=MODULES)
                 self.check('''
                     NS.Store:Observe({name="Alliance Player",race="Human"},"who")
@@ -889,7 +889,7 @@ class UIContracts(unittest.TestCase):
                     NS.UI:Refresh()
                     assert(panel.snapshot.total==1 and panel.snapshot.byRace.Orc==1)
                     assert(panel.snapshot.byRace.Human==nil)
-                    assert(BatataScanner.GetCensus().total==2)
+                    assert(Batata_Scanner.GetCensus().total==2)
                     assert(#whoCalls==0 and #errors==0)
                 ''')
 
@@ -911,7 +911,7 @@ class UIContracts(unittest.TestCase):
             assert(not panel.searching and panel.refreshPaused and panel.inputError)
             Advance(31)
             assert(panel.list:ItemCount()==2 and not panel.searching)
-            assert(not BatataScanner_Dismiss:IsShown())
+            assert(not Batata_Scanner_Dismiss:IsShown())
             panel.input:SetText("Beta")
             panel:Submit()
             Advance(0)
@@ -967,7 +967,7 @@ class UIContracts(unittest.TestCase):
             local level=tonumber(query:match("(%d+)%-%d+$"))
             Deliver({{fullName="Fresh Who Result",level=level,filename="MAGE",classStr="Mage"}})
             Advance(1)
-            assert(panel.list:ItemCount()==0 and BatataScanner.CountPlayers()==1)
+            assert(panel.list:ItemCount()==0 and Batata_Scanner.CountPlayers()==1)
             Advance(28.9)
             assert(panel.list:ItemCount()==0, "Who replies must respect the browser refresh interval")
             Advance(.1)
@@ -1150,7 +1150,7 @@ class UIContracts(unittest.TestCase):
             NS.Store:Observe({name="New Class",level=40,class="WARRIOR",race="Dwarf"})
             Advance(1)
             assert(reads==0 and panel.snapshot.total==1 and chart.hoveredEntry==hovered)
-            assert(BatataScanner.CountPlayers()==2, "collection and API must remain current")
+            assert(Batata_Scanner.CountPlayers()==2, "collection and API must remain current")
             Advance(22.9)
             assert(reads==0 and panel.snapshot.total==1)
             Advance(.1)
@@ -1259,7 +1259,7 @@ class UIContracts(unittest.TestCase):
             NS.context.faction="Alliance"
             NS.UI:Refresh()
             assert(panel.snapshot.total==1 and panel.classChart.total==1)
-            assert(BatataScanner.CountPlayers()==3 and #whoCalls==0 and #errors==0)
+            assert(Batata_Scanner.CountPlayers()==3 and #whoCalls==0 and #errors==0)
         ''')
 
     def test_recency_filters_expire_without_new_observations(self):
@@ -1276,7 +1276,7 @@ class UIContracts(unittest.TestCase):
             epoch=epoch+3601
             Advance(31)
             assert(panel.list:ItemCount()==0, "recency must expire without DATA_UPDATED")
-            assert(NS.db.revision==revision and BatataScanner.CountPlayers()==1)
+            assert(NS.db.revision==revision and Batata_Scanner.CountPlayers()==1)
             assert(#errors==0)
         ''')
 
@@ -1370,7 +1370,7 @@ class UIContracts(unittest.TestCase):
             assert(panel.list:GetItem(1000)~=nil)
             assert(panel.list:GetItem(1001)==nil)
             assert(panel.scanSummary:GetText()=="Showing first 1000 matches; narrow your search for more.")
-            assert(BatataScanner.CountPlayers()==1200)
+            assert(Batata_Scanner.CountPlayers()==1200)
             assert(#whoCalls==0 and #errors==0)
         ''')
 

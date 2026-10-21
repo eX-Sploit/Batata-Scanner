@@ -1,4 +1,4 @@
--- BatataScanner: click-driven, bounded Who census collection.
+-- Batata Scanner: click-driven, bounded Who census collection.
 -- Addon folder name and the shared private namespace supplied by the client.
 local ADDON,
     NS = ...
