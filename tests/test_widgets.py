@@ -6,14 +6,17 @@ import unittest
 from harness import Harness
 
 
-UI_SUPPORT = Path(__file__).with_name("ui_support.lua").read_text(encoding="utf-8")
+UI_SUPPORT = Path(__file__).with_name("ui_support.lua").read_text(encoding="utf-8")  # Shared native widget mocks.
 
 
 class WidgetContracts(unittest.TestCase):
+    """Checks shared table and widget behavior."""
     def setUp(self):
+        """Creates a fresh test fixture before each test."""
         self.client = Harness(initialize=False, setup=UI_SUPPORT, modules=("Widgets.lua",))
 
     def test_provider_reaches_last_record_without_building_all_rows(self):
+        """Verifies that provider reaches last record without building all rows."""
         self.client.execute(r'''
             local widgets=NS.Widgets
             local fetched={}
@@ -48,6 +51,7 @@ class WidgetContracts(unittest.TestCase):
         ''')
 
     def test_rebound_rows_clear_tooltips_and_selection_and_sort_by_current_column(self):
+        """Verifies that rebound rows clear tooltips and selection and sort by current column."""
         self.client.execute(r'''
             local sorted
             local selected="one"
@@ -83,11 +87,29 @@ class WidgetContracts(unittest.TestCase):
             assert(list.empty:GetText()=="No players")
         ''')
 
+    def test_rows_keep_hover_and_selection_without_unused_stripe_textures(self):
+        """Verifies that rows keep hover and selection without unused stripe textures."""
+        self.client.execute('''
+            local list=NS.Widgets.CreateTable(UIParent, {
+                {key="name", label="Name", text=function(item) return item.name end},
+            })
+            list.frame:SetSize(400,list:HeightForRows(2))
+            list:Layout()
+            list:SetItems({{name="Visible"}})
+            for rowIndex,row in ipairs(list.rows) do
+                assert(row.stripe==nil)
+                assert(row:GetHighlightTexture()~=nil and row.sel~=nil)
+            end
+        ''')
+
     def test_class_colors_and_surface_properties_belong_to_this_addon(self):
+        """Verifies that class colors and surface properties belong to this addon."""
         self.client.execute(r'''
             local red,green,blue=NS.Widgets.ClassColor("MAGE")
             assert(red==RAID_CLASS_COLORS.MAGE.r and green==RAID_CLASS_COLORS.MAGE.g)
             assert(blue==RAID_CLASS_COLORS.MAGE.b)
+            red=NS.Widgets.ClassColor("Warrior")
+            assert(red==RAID_CLASS_COLORS.WARRIOR.r and NS.Widgets.ClassToken("Druid")=="DRUID")
             red,green,blue=NS.Widgets.ClassColor(nil)
             assert(red==1 and green==1 and blue==1)
             local panel=CreateFrame("Frame",nil,UIParent,"BackdropTemplate")
