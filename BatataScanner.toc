@@ -1,0 +1,19 @@
+# WoW Forever; source baseline 1.60.1 (70374), not a runtime verification.
+## Interface: 16001
+## Title: |cffffcc66BatataScanner|r
+## Notes: Player observations, Who scanning, and census data with a read-only addon API.
+## Author: Rani
+## Version: 1.0.2
+## SavedVariables: BatataScanner_DB
+## IconTexture: Interface\Icons\INV_Misc_Spyglass_03
+## X-Category: Data
+
+Core.lua
+Store.lua
+Scanner.lua
+Passive.lua
+API.lua
+Widgets.lua
+ScannerPanel.lua
+CensusPanel.lua
+UI.lua
