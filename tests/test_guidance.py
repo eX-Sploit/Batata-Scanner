@@ -8,26 +8,28 @@ from urllib.parse import unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[1]  # Repository root used to resolve guidance and manifest paths.
-SKILLS = ("wow-addon-api", "wow-forever-social", "wow-forever-ui", "wow-forever-workflow")  # Canonical contributor skill set.
+SKILLS = ("lua", "research", "wow-addon-api", "wow-forever-api-research", "wow-forever-social", "wow-forever-ui", "wow-forever-workflow")  # Canonical contributor skill set.
 PIN = "735496de78ebd30ce816a0637982c556987f258c"  # Immutable source revision required by API evidence tests.
 
 
 class GuidanceTests(unittest.TestCase):
     """Checks contributor guidance, API evidence, and manifest consistency."""
-    def test_skill_frontmatter_and_discovery_wrappers(self):
-        """Verifies that skill frontmatter and discovery wrappers."""
+    def test_canonical_skills_are_configured_in_agents_folder(self):
+        """Verifies skills live in one configured .agents folder."""
         for name in SKILLS:
-            canonical = ROOT / "skills" / name / "SKILL.md"
+            canonical = ROOT / ".agents" / "skills" / name / "SKILL.md"
             text = canonical.read_text(encoding="utf-8")
             metadata = re.match(r"\A---\n(.*?)\n---\n", text, re.DOTALL)
             self.assertIsNotNone(metadata, str(canonical))
             self.assertIn(f"name: {name}\n", metadata.group(1) + "\n")
             self.assertRegex(metadata.group(1), r"(?m)^description: .+")
-            for folder in (".agents/skills", ".github/skills"):
-                wrapper = ROOT / folder / name / "SKILL.md"
-                wrapper_text = wrapper.read_text(encoding="utf-8")
-                self.assertTrue(wrapper_text.startswith("---\n"), str(wrapper))
-                self.assertIn(f"../../../skills/{name}/SKILL.md", wrapper_text)
+        settings = json.loads((ROOT / ".vscode/settings.json").read_text(encoding="utf-8"))
+        self.assertEqual(settings["chat.agentSkillsLocations"], {"./.agents/skills": True})
+        self.assertTrue(settings["chat.useAgentsMdFile"])
+        self.assertFalse(settings["github.copilot.chat.codeGeneration.useInstructionFiles"])
+        self.assertFalse((ROOT / ".github/copilot-instructions.md").exists())
+        self.assertFalse((ROOT / ".github/skills").exists())
+        self.assertFalse((ROOT / "skills").exists())
 
     def test_markdown_local_references_are_portable(self):
         """Verifies that markdown local references are portable."""

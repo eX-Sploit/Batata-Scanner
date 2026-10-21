@@ -6,7 +6,7 @@ import sys
 from align_lua import align_source, parse, walk
 
 
-ROOT = Path(__file__).resolve().parents[3]  # Addon root used as the default declaration-check scope.
+ROOT = Path(__file__).resolve().parents[4]  # Addon root used as the default declaration-check scope.
 
 
 # Yield local declarations containing multiple names together with their initializer expressions.

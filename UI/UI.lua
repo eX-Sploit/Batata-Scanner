@@ -1,4 +1,4 @@
--- Batata Scanner: GuildHQ's portrait shell and right-side navigation.
+-- Batata Scanner: portrait shell and right-side navigation.
 -- Addon folder name and the private namespace table shared by all addon files.
 local ADDON,
     NS = ...

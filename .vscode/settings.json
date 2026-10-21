@@ -1,16 +1,16 @@
 {
     "chat.useAgentsMdFile": true,
     "chat.agentSkillsLocations": {
-        "./skills": true
+        "./.agents/skills": true
     },
-    "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+    "github.copilot.chat.codeGeneration.useInstructionFiles": false,
     "github.copilot.chat.commitMessageGeneration.instructions": [
         { "text": "Keep the commit subject under 150 characters. Use a body only when needed to explain compatibility or the grouped changes." },
         { "text": "Use plain prose. Do not add Conventional Commit prefixes such as feat: or fix:, scopes, labels, Markdown, quotes, or emoji." },
         { "text": "Start the commit subject with a capitalized imperative verb, such as Add, Fix, Remove, or Simplify." },
         { "text": "Never use enhance, improve, or any forms of those words. Name the specific action and affected behavior, such as Prevent duplicate invites or Remove empty replies. Avoid vague claims about quality." },
         { "text": "Read the full staged diff and lead with the actual bug fixed, feature added, or behavior changed. Prioritize substantive changes over manifest metadata, tests, and supporting documentation. For documentation or tooling changes, name the specific policy or workflow changed. Do not invent changes, reasons, or issue numbers." },
-        { "text": "Omit routine release version bumps and release version numbers from both the subject and body. Never summarize a behavioral change as Update version, Bump version, or similar release bookkeeping. A required GuildHQ.toc version bump is incidental to the fix or feature." },
+        { "text": "Omit routine release version bumps and release version numbers from both the subject and body. Never summarize a behavioral change as Update version, Bump version, or similar release bookkeeping. Describe the actual fix or feature; omit incidental version changes." },
         { "text": "Include supporting tests, refactors, or documentation only when they help explain the main change. Avoid generic phrases such as adjust related documentation or update related files." }
     ]
 }

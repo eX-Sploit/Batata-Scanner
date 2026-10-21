@@ -4,18 +4,19 @@ Batata Scanner is a standalone Lua addon for WoW Forever. Its manifest targets I
 
 ## Scope and skills
 
-Before relevant changes, read the matching skill. Skills apply to Codex and Copilot; [.github/copilot-instructions.md](.github/copilot-instructions.md) points to the same canonical guidance.
+Before relevant changes, read the matching skill. This AGENTS.md file is the shared contributor policy for Copilot and Codex. Canonical task-specific skills live in `.agents/skills/`.
 
 | Task | Skill |
 |---|---|
-| Lua, API selection, compatibility, TOC | [wow-addon-api](skills/wow-addon-api/SKILL.md) |
-| Census, Who queries, passive observations, player identity | [wow-forever-social](skills/wow-forever-social/SKILL.md) |
-| Frames, tables, scrolling, settings, restricted displays | [wow-forever-ui](skills/wow-forever-ui/SKILL.md) |
-| Loading, persistence, packaging, debugging, performance | [wow-forever-workflow](skills/wow-forever-workflow/SKILL.md) |
+| Frames, tables, scrolling, settings, restricted displays | [wow-forever-ui](.agents/skills/wow-forever-ui/SKILL.md) |
+| Lua, API selection, compatibility, TOC | [wow-addon-api](.agents/skills/wow-addon-api/SKILL.md) |
+| WoW Forever API research and evidence | [wow-forever-api-research](.agents/skills/wow-forever-api-research/SKILL.md) |
+| Census, Who queries, passive observations, player identity | [wow-forever-social](.agents/skills/wow-forever-social/SKILL.md) |
+| Loading, persistence, packaging, debugging, performance | [wow-forever-workflow](.agents/skills/wow-forever-workflow/SKILL.md) |
 
 ## Ownership and public contracts
 
-- Work only in this addon unless the user explicitly requests another repository. GuildHQ is a separate addon and source reference; do not import its SavedVariables or edit its files.
+- Work only in this addon unless the user explicitly requests another repository. Do not read or modify other addon's files or import external SavedVariables.
 - Preserve account-wide `Batata_Scanner_DB`. Initialization and observation ingestion belong to this addon. Never expose public database insertion, update, deletion, reset, settings mutation, scan control, or raw-table access methods.
 - The `Batata_Scanner` global is a versioned fetch/filter API. Read [docs/API.md](docs/API.md) before changing it. Return copies of data, including nested source maps and callback payloads. Preserve the read-only facade and prevent consumers from reaching internal modules through it.
 - Shared Lua globals and SavedVariables are accessible to other addon code. A read-only API is a supported contract, not security isolation. Do not claim otherwise.
@@ -25,9 +26,9 @@ Before relevant changes, read the matching skill. Skills apply to Codex and Copi
 
 ## API evidence and Lua conventions
 
-Start with [the evidence index](docs/wow-forever-api/README.md). Search the focused [symbol snapshot](docs/wow-forever-api/api-symbols.jsonl) by `lookup`; follow pinned source links for signatures and restrictions. This is deliberately a subset. An absent record does not prove an API is absent, and a declaration does not prove addon permission or current runtime availability.
+Use the [API research skill](.agents/skills/wow-forever-api-research/SKILL.md) for evidence boundaries and investigation steps. Search the focused [symbol snapshot](docs/wow-forever-api/api-symbols.jsonl) by `lookup`; follow pinned source links for signatures and restrictions. This is deliberately a subset. An absent record does not prove an API is absent, and a declaration does not prove addon permission or current runtime availability.
 
-Before Lua edits, read [formatting conventions](skills/wow-addon-api/references/lua-formatting.md) and [.stylua.toml](.stylua.toml). Use Lua 5.1, descriptive names, CRLF, four spaces, multiline bodies, and the shared addon namespace from `...`. Use TOC loading rather than `require`. Preserve public/saved identifiers and load order. Keep formatting scoped.
+Before Lua edits, read [formatting conventions](.agents/skills/wow-addon-api/references/lua-formatting.md) and [.stylua.toml](.stylua.toml). Use Lua 5.1, descriptive names, CRLF, four spaces, multiline bodies, and the shared addon namespace from `...`. Use TOC loading rather than `require`. Preserve public/saved identifiers and load order. Keep formatting scoped.
 
 ## Release versioning
 
@@ -39,11 +40,11 @@ Run relevant existing mocked tests from the addon root, for example:
 
 ```powershell
 python -m unittest discover -s tests
-python skills/wow-addon-api/scripts/check_lua_names.py
-python skills/wow-addon-api/scripts/split_lua_locals.py --check
-python skills/wow-addon-api/scripts/align_lua.py --check
+python .agents/skills/wow-addon-api/scripts/check_lua_names.py
+python .agents/skills/wow-addon-api/scripts/split_lua_locals.py --check
+python .agents/skills/wow-addon-api/scripts/align_lua.py --check
 ```
 
-For skill/document-only changes, validate frontmatter, local references, and manifest consistency with `python -m unittest discover -s tests -p 'test_guidance.py'`; gameplay tests are unnecessary. Formatting helpers require the pinned parser dependencies in [requirements.txt](skills/wow-addon-api/scripts/requirements.txt).
+For skill/document-only changes, validate frontmatter, local references, and manifest consistency with `python -m unittest discover -s tests -p 'test_guidance.py'`; gameplay tests are unnecessary. Formatting helpers require the pinned parser dependencies in [requirements.txt](.agents/skills/wow-addon-api/scripts/requirements.txt).
 
 Distinguish mocks/static inspection from in-game tests. Client restrictions, server caps/throttles, Who routing coexistence, surname behavior, visual layout, and full-process persistence require named-build runtime evidence. Never describe them as verified by mocks. Preserve unrelated working-tree changes.

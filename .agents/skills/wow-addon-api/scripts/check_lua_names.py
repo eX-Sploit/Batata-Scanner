@@ -5,7 +5,7 @@ import sys
 from align_lua import parse, walk
 
 
-ROOT = Path(__file__).resolve().parents[3]  # Addon root used when no source paths are passed.
+ROOT = Path(__file__).resolve().parents[4]  # Addon root used when no source paths are passed.
 PUBLIC_NAMES = {'NS', 'UI', 'ADDON'}  # Established namespace names exempt from the opaque-name rule.
 OPAQUE_NAMES = {  # Short aliases rejected even when their character count exceeds the generic limit.
     'src', 'dst', 'arr', 'opts', 'arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6',

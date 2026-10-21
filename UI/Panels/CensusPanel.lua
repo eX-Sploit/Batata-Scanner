@@ -1,4 +1,4 @@
--- Batata Scanner: the scanner census in GuildHQ's native table presentation.
+-- Batata Scanner: census charts and statistics from stored observations.
 -- Addon name and private namespace supplied by the TOC loader.
 local ADDON,
     NS = ...

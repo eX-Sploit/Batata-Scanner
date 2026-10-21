@@ -1,6 +1,6 @@
 # Batata Scanner API evidence notes
 
-Source baseline: **1.60.1 (70374)** at commit **`735496de78ebd30ce816a0637982c556987f258c`**, collected **2026-10-14**. These are migrated source findings, not tests run in WoW. See [evidence boundaries](README.md) and the selected [declarations](api-symbols.jsonl).
+Source baseline: **1.60.1 (70374)** at commit **`735496de78ebd30ce816a0637982c556987f258c`**, collected **2026-10-14**. These are selected source findings, not tests run in WoW. See the [API research skill](../../.agents/skills/wow-forever-api-research/SKILL.md) for evidence boundaries and the selected [declarations](api-symbols.jsonl).
 
 ## Who queries and observations
 
@@ -15,7 +15,7 @@ The generated declaration provides `C_FriendList.SendWho(filter, origin?, filter
 
 ## Race/class planning
 
-The shared internal race/class roster in [Core.lua](../../Core/Core.lua), used by scanner planning and census presentation, mirrors GuildHQ's pre-removal revision `ef7a9674a5b7c0bd18ce160bba0011cf4f0d29bf`, inspected locally on **2026-10-19**. It covers nine Forever classes and five races per faction, including High Order Skyborne, Windshaper Skyborne, Dwarf Shaman, and Undead Paladin. This is reference-addon data, not a current-client roster test. Batata Scanner owns its copy and has no runtime dependency on GuildHQ.
+The shared internal race/class roster in [Core.lua](../../Core/Core.lua), used by scanner planning and census presentation, covers nine Forever classes and five races per faction, including High Order Skyborne, Windshaper Skyborne, Dwarf Shaman, and Undead Paladin. This is the addon's query-planning data, not a current-client roster test.
 
 Subdivision preserves level halving, then selects only the current faction's races compatible with an existing class filter, then only classes compatible with a race filter. Native Who names are matched by `WhoFilter.ID`; absent names fall back to guarded `C_CreatureInfo.GetRaceInfo(raceID)` and finally the reference names. Class names use guarded `GetClassInfo`, localized class globals, then the reference names. Unreadable native choices retain an incomplete-coverage warning. Unsupported class selections are rejected; invalid saved pairs are discarded with incomplete coverage reported.
 

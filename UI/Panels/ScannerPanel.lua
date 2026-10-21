@@ -1,4 +1,4 @@
--- Batata Scanner: GuildHQ's scanner browser.
+-- Batata Scanner: searchable browser for recorded players.
 -- Addon name and private namespace supplied by the TOC loader.
 local ADDON,
     NS = ...

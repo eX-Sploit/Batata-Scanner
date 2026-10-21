@@ -10,7 +10,7 @@ import tree_sitter_lua
 
 
 PARSER = Parser(Language(tree_sitter_lua.language()))  # Shared Tree-sitter parser for Lua source bytes.
-ROOT = Path(__file__).resolve().parents[3]  # Addon root used as the default formatting scope.
+ROOT = Path(__file__).resolve().parents[4]  # Addon root used as the default formatting scope.
 
 
 @dataclass

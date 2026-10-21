@@ -102,8 +102,8 @@ class WidgetContracts(unittest.TestCase):
             end
         ''')
 
-    def test_class_colors_and_surface_properties_belong_to_this_addon(self):
-        """Verifies that class colors and surface properties belong to this addon."""
+    def test_class_colors_and_surface_properties(self):
+        """Verifies class colors and the addon surface profile."""
         self.client.execute(r'''
             local red,green,blue=NS.Widgets.ClassColor("MAGE")
             assert(red==RAID_CLASS_COLORS.MAGE.r and green==RAID_CLASS_COLORS.MAGE.g)
@@ -114,8 +114,7 @@ class WidgetContracts(unittest.TestCase):
             assert(red==1 and green==1 and blue==1)
             local panel=CreateFrame("Frame",nil,UIParent,"BackdropTemplate")
             NS.Widgets.ProfileSurface(panel)
-            assert(panel.batataInset and panel.guildHQInset==nil)
-            assert(NS.GuildWidgets==nil and _G.GuildWidgets==nil)
+            assert(panel.batataInset)
         ''')
 
 

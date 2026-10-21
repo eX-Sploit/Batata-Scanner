@@ -1,4 +1,4 @@
--- Batata Scanner: welcome overview and quick start, adapted from GuildHQ.
+-- Batata Scanner: welcome overview and quick start.
 -- Addon folder name and the private namespace table shared by all addon files.
 local ADDON,
     NS = ...

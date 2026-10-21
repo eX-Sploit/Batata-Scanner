@@ -1,5 +1,5 @@
 -- Batata Scanner
--- Widgets.lua : standalone adaptations of GuildHQ shared visual primitives.
+-- Widgets.lua : shared visual primitives used by addon panels.
 
 -- Addon folder name and the private namespace shared by every file in the TOC.
 local ADDON,
@@ -1385,7 +1385,7 @@ function Widgets.SettingsButton(parent)
     return Button(parent, "Settings", 92)
 end
 
--- Native search artwork used by GuildHQ's player and guild tables.
+-- Native search artwork used by player and guild tables.
 local function SearchBox(parent, width)
     local editBox = CreateFrame("EditBox", nil, parent, "SearchBoxTemplate")
     editBox:SetSize(width or 200, 20)

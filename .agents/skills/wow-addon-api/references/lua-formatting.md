@@ -1,7 +1,7 @@
 # Lua Formatting
 
 Apply these conventions whenever writing, editing, or formatting this addon's Lua files.
-The target grammar is Lua 5.1. The root [.stylua.toml](../../../.stylua.toml) configures the base formatter;
+The target grammar is Lua 5.1. The root [.stylua.toml](../../../../.stylua.toml) configures the base formatter;
 apply declaration layout and assignment alignment afterward.
 
 ## Research And Project Choices
@@ -61,8 +61,8 @@ Do not use blind text replacement or change runtime table keys to match renamed 
 Run the bundled [naming audit](../scripts/check_lua_names.py), using the same parser dependencies as the alignment helper:
 
 ```text
-python skills/wow-addon-api/scripts/check_lua_names.py --self-test
-python skills/wow-addon-api/scripts/check_lua_names.py
+python .agents/skills/wow-addon-api/scripts/check_lua_names.py --self-test
+python .agents/skills/wow-addon-api/scripts/check_lua_names.py
 ```
 
 With no paths, it checks every Lua file in the addon; individual file or directory arguments limit its scope.
@@ -105,9 +105,9 @@ and before assignment alignment, and verify the combined workflow rather than re
 Use the bundled [declaration-layout helper](../scripts/split_lua_locals.py), which uses the existing parser dependencies:
 
 ```text
-python skills/wow-addon-api/scripts/split_lua_locals.py --self-test
-python skills/wow-addon-api/scripts/split_lua_locals.py
-python skills/wow-addon-api/scripts/split_lua_locals.py --check
+python .agents/skills/wow-addon-api/scripts/split_lua_locals.py --self-test
+python .agents/skills/wow-addon-api/scripts/split_lua_locals.py
+python .agents/skills/wow-addon-api/scripts/split_lua_locals.py --check
 ```
 
 It checks every addon Lua file by default, accepts file or directory arguments to limit scope, and reapplies
@@ -212,13 +212,13 @@ It requires Python 3.11 or newer and the parser versions in [requirements.txt](.
 From the addon root:
 
 ```text
-python -m pip install -r skills/wow-addon-api/scripts/requirements.txt
-python skills/wow-addon-api/scripts/split_lua_locals.py --self-test
-python skills/wow-addon-api/scripts/split_lua_locals.py
-python skills/wow-addon-api/scripts/split_lua_locals.py --check
-python skills/wow-addon-api/scripts/align_lua.py --self-test
-python skills/wow-addon-api/scripts/align_lua.py
-python skills/wow-addon-api/scripts/align_lua.py --check
+python -m pip install -r .agents/skills/wow-addon-api/scripts/requirements.txt
+python .agents/skills/wow-addon-api/scripts/split_lua_locals.py --self-test
+python .agents/skills/wow-addon-api/scripts/split_lua_locals.py
+python .agents/skills/wow-addon-api/scripts/split_lua_locals.py --check
+python .agents/skills/wow-addon-api/scripts/align_lua.py --self-test
+python .agents/skills/wow-addon-api/scripts/align_lua.py
+python .agents/skills/wow-addon-api/scripts/align_lua.py --check
 ```
 
 With no paths, the helper checks every Lua file beneath the addon root. Supply individual Lua files or directories

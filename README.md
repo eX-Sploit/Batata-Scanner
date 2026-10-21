@@ -150,7 +150,7 @@ History retention is account-wide and opt-in. Saving a finite period permanently
 
 - Batata Scanner is for tracking and local census data.
 - It is not a recruitment or guild management tool.
-- It keeps its own local data and does not rely on GuildHQ data.
+- It keeps its own local data, separate from other addons.
 - It is meant to work as a read-only helper for your own information and addon use.
 
 ## Compatibility
