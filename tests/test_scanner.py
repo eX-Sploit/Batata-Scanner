@@ -77,7 +77,7 @@ class ScannerTests(unittest.TestCase):
     def test_default_state_is_playing_without_dispatching(self):
         """Verifies that default state is playing without dispatching."""
         self.harness = Harness(setup=SCANNER_SETUP + 'Batata_Scanner_DB=nil')
-        self.check("NS.db.settings.queryInterval==15")
+        self.check("NS.db.settings.queryInterval==6")
         self.check("NS.db.settings.scanBehavior=='random'")
         self.check("NS.Scanner:GetStatus().running and not NS.Scanner:GetStatus().paused")
         self.check("NS.Scanner:GetStatus().state=='ready' and NS.Scanner:GetStatus().remainingQueries==6")

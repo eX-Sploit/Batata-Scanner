@@ -8,7 +8,7 @@ local Panel = {}
 NS.WelcomePanel = Panel -- Exposes the panel so UI.lua can build it and read its icon.
 
 local Widgets    = NS.Widgets -- Shared widget factories, colors, and footer metrics.
-local LOGO_SIZE  = 96 -- Pixel size of the primary Welcome-page image.
+local LOGO_SIZE  = 56 -- Small enough for Overview to fit the compact window without scrolling.
 local LOGO_GAP   = 16 -- Space between the Welcome image and heading text.
 Panel.icon = NS.iconTexture -- Welcome tab/portrait icon and Overview logo.
 

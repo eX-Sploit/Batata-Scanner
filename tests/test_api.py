@@ -15,7 +15,6 @@ class ReadOnlyAPITests(unittest.TestCase):
         """Verifies that ready metadata and no mutation surface."""
         self.harness.execute('''
             assert(Batata_Scanner.IsReady())
-            assert(Batata_Scanner.GetVersion()=="1.0.0")
             assert(Batata_Scanner.GetAPIVersion()==1)
             assert(Batata_Scanner.GetVersion()==TOC_VERSION)
             assert(Batata_Scanner.GetAPIVersion()==tonumber(TOC_METADATA["X-API-Version"]))
@@ -37,7 +36,7 @@ class ReadOnlyAPITests(unittest.TestCase):
             assert(Batata_Scanner_DB.schemaVersion==1)
             assert(Batata_Scanner.CountPlayers()==0)
             assert(NS.db.settings.minLevel==1)
-            assert(NS.db.settings.queryInterval==15)
+            assert(NS.db.settings.queryInterval==6)
         ''')
 
     def test_all_nested_results_are_detached(self):

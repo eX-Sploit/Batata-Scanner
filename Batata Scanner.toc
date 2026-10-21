@@ -3,7 +3,7 @@
 ## Title: |cffffcc66Batata Scanner|r
 ## Notes: Player observations, Who scanning, and census data with a read-only addon API.
 ## Author: Rani
-## Version: 1.0.0
+## Version: 1.0.1
 ## X-API-Version: 1
 ## SavedVariables: Batata_Scanner_DB
 ## IconTexture: Interface\Icons\INV_Misc_Spyglass_03

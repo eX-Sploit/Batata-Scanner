@@ -188,7 +188,7 @@ local function InitializeSavedState()
     settings.overrideDefaults   = settings.overrideDefaults == true
     settings.minLevel           = NS.Number(settings.minLevel, 1, 60, 1)
     settings.maxLevel           = NS.Number(settings.maxLevel, settings.minLevel, 60, 60)
-    settings.queryInterval      = NS.Number(settings.queryInterval, 6, 60, 15)
+    settings.queryInterval      = NS.Number(settings.queryInterval, 6, 60, 6)
     settings.queryTimeout       = NS.Number(settings.queryTimeout, 6, 120, 10)
     settings.searchMinLevel     = NS.Number(settings.searchMinLevel, 1, 255, nil)
     settings.searchMaxLevel     = NS.Number(settings.searchMaxLevel, settings.searchMinLevel or 1, 255, nil)

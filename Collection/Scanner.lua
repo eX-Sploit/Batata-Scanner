@@ -93,9 +93,9 @@ local function ReceivedNumber(value, minimum, maximum)
     return value
 end
 
--- Returns the configured seconds between Who sends, clamped to 6-120 with default 15.
+-- Returns the configured seconds between Who sends, clamped to 6-120 with default 6.
 local function Interval()
-    return Number(NS.db and NS.db.settings.queryInterval, 6, 120, 15)
+    return Number(NS.db and NS.db.settings.queryInterval, 6, 120, 6)
 end
 
 -- Returns the configured Who reply timeout in seconds, clamped to 5-120 with default 10.

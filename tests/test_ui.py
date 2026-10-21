@@ -94,7 +94,8 @@ class UIContracts(unittest.TestCase):
             assert(welcome.root:IsVisible() and NS.UI.pageTitle:GetText()=="Welcome")
             local welcomeLogo=welcome.pages[1].logo
             assert(welcome.icon=="Interface\\AddOns\\Batata Scanner\\Assets\\batata-scanner-icon.png")
-            assert(welcomeLogo.texture==welcome.icon and welcomeLogo:GetWidth()==96 and welcomeLogo:GetHeight()==96)
+            assert(welcomeLogo.texture==welcome.icon and welcomeLogo:GetWidth()==56 and welcomeLogo:GetHeight()==56)
+            assert(NS.UI.frame:GetHeight()==480 and welcome.pages[1].scroll.range==0)
             assert(NS.UI.pageTitle.properties.SetJustifyH[1]=="LEFT")
             assert(#welcome.navigation.links==2 and welcome.navigation.selected==1)
             assert(welcome.navigation.links[1]:GetText()=="Overview")
@@ -258,8 +259,8 @@ class UIContracts(unittest.TestCase):
             assert(#whoCalls==1 and #errors==0)
         ''')
 
-    def test_scan_speed_defaults_to_balanced_and_saved_presets_control_cooldown(self):
-        """Verifies that scan speed defaults to balanced and saved presets control cooldown."""
+    def test_scan_speed_defaults_to_fast_and_saved_presets_control_cooldown(self):
+        """Verifies that scan speed defaults to fast and saved presets control cooldown."""
         for preset_index, interval in enumerate((6, 15, 30), start=1):
             with self.subTest(interval=interval):
                 self.client = Harness(setup=UI_SUPPORT, modules=MODULES)
@@ -275,9 +276,9 @@ class UIContracts(unittest.TestCase):
                     assert(options[1].label=="Fast" and options[1].value==6)
                     assert(options[2].label=="Balanced" and options[2].value==15)
                     assert(options[3].label=="Slow" and options[3].value==30)
-                    assert(panel.speedDropdown:GetValue()==15 and NS.db.settings.queryInterval==15)
+                    assert(panel.speedDropdown:GetValue()==6 and NS.db.settings.queryInterval==6)
                     panel.speedDropdown:Select(presetIndex)
-                    assert(NS.db.settings.queryInterval==15)
+                    assert(NS.db.settings.queryInterval==6)
                     ClickWidget(panel.scanSettings.doneButton)
                     assert(NS.db.settings.queryInterval==expectedInterval)
                     assert(NS.Scanner:GetStatus().plannedQueries==planned and #whoCalls==0)

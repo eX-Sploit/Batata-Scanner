@@ -53,7 +53,7 @@ Open Settings to choose:
 
 - Set your level range
 - Limit which classes are scanned
-- Choose **Fast**, **Balanced** (default), or **Slow** scan speed
+- Choose **Fast** (default), **Balanced**, or **Slow** scan speed
 - Choose **Random** (default, query chunks in random order without repetitions), **In Order** (lowest to highest level), or **Reversed** (highest to lowest) scan behavior
 - Choose whether to use the default sweep settings or override them
 - Set **Delete unseen after** to **Never** (default), **30 days**, **90 days**, **180 days**, or **365 days**
