@@ -5,7 +5,9 @@ description: 'Use when verifying WoW Forever API declarations, runtime claims, r
 
 # WoW Forever API research
 
-Use this workflow to verify API claims against high-trust primary sources and keep evidence boundaries explicit. The current source pin is **1.60.1 (70374)** at commit **`735496de78ebd30ce816a0637982c556987f258c`**, collected **2026-10-14**. It is not a runtime test of the installed client.
+Use this workflow to verify API claims against high-trust primary sources and keep evidence boundaries explicit. The current source pin is **1.60.1 (70790)** at commit **`eac30af597e5aaa43a60f6675ef5fdcea100375f`**, collected **2026-11-05**. It is not a runtime test of the installed client.
+
+The installed client also reports **1.60.1.70790** through executable and launcher metadata, checked **2026-11-05**. See the [build verification notes](../../../docs/wow-forever-api/API-REFERENCE.md#installed-client-verification) for scope and comparison results. Preserve the original pins on dated historical findings.
 
 ## References
 
@@ -31,4 +33,4 @@ Use this workflow to verify API claims against high-trust primary sources and ke
 5. Do not infer API absence from a missing selected record, infer addon permission from a declaration alone, or replace a pinned revision with a moving branch.
 6. Label mocked/static validation separately from in-game measurements. Never describe one evidence level as another.
 
-This repository's evidence has not been collected by launching or instrumenting WoW. Do not relabel the pin as build 70450 or current without matching evidence.
+Installation metadata establishes the installed build, not in-game API behavior. Do not relabel source inspection or mocked checks as named-build runtime verification.

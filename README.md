@@ -60,13 +60,13 @@ Open Settings to choose:
 
 Fast, Balanced, and Slow use 6-, 15-, and 30-second query intervals. Settings changes take effect when you save. History cleanup is optional and account-wide; choosing a finite retention period permanently deletes older observations.
 
-Made for personal discovery, Batata Scanner keeps your observations on your account; it doesn't contact players or manage guilds. It targets WoW Forever Interface **16001**.
+Made for personal discovery, Batata Scanner keeps your observations on your account; it doesn't contact players or manage guilds. It targets WoW Forever **1.60.1.70790**, Interface **16001**. The client build was confirmed from installation metadata on **2026-11-05**; API source checks and remaining in-game validation are described in the [compatibility notes](docs/wow-forever-api/API-REFERENCE.md#installed-client-verification).
 
 ## For addon developers
 
 If you are building another addon and want to read Batata Scanner’s data, see [docs/API.md](docs/API.md).
 
-That API is intentionally read-only and designed to return copies of data instead of exposing internal storage directly.
+That API is intentionally read-only and designed to return copies of data instead of exposing internal storage directly. Consumers can use budgeted snapshot cursors and a sequenced change feed to retrieve large collections without synchronous full-population queries.
 
 ## License
 

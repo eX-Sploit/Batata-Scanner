@@ -5,7 +5,7 @@ description: 'Implement or debug Batata Scanner frames, scan controls, census ta
 
 # WoW Forever scanner UI
 
-Read the [API baseline](../wow-addon-api/SKILL.md), [window shell](../../../UI/UI.lua), [shared widgets](../../../UI/Widgets.lua), and the affected [Scanner](../../../UI/Panels/ScannerPanel.lua) or [Census](../../../UI/Panels/CensusPanel.lua) panel before editing presentation. Consult the [focused evidence](../../../docs/wow-forever-api/API-REFERENCE.md) for API details. The baseline is source **1.60.1 (70374)**, not an in-game test. Preserve the right-side icon navigation, combined scanner browser/details, compact playback controls, settings dialog, Census subsections, and native scrolling tables.
+Read the [API baseline](../wow-addon-api/SKILL.md), [window shell](../../../UI/UI.lua), [shared widgets](../../../UI/Widgets.lua), and the affected [Scanner](../../../UI/Panels/ScannerPanel.lua) or [Census](../../../UI/Panels/CensusPanel.lua) panel before editing presentation. Consult the [focused evidence](../../../docs/wow-forever-api/API-REFERENCE.md) for API details. The baseline is source **1.60.1 (70790)**, not an in-game test. Preserve the right-side icon navigation, combined scanner browser/details, compact playback controls, settings dialog, Census subsections, and native scrolling tables.
 
 ## Compose and bind
 

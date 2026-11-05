@@ -230,17 +230,35 @@ local function BeginRouting()
     SetRouting(true)
 end
 
--- Restores the player's Who routing choice and re-registers suspended native frames.
-local function EndRouting()
+-- Restores suspended listeners after dispatch, unless another scanner request owns them.
+local function RestoreNativeListeners()
+    eventFrame:SetScript("OnUpdate", nil)
+    if routing then
+        return
+    end
+    for nativeFrame in pairs(suspendedListeners) do
+        nativeFrame:RegisterEvent("WHO_LIST_UPDATE")
+    end
+    suspendedListeners = {}
+end
+
+-- Restores the player's routing choice and only the native listeners we suspended.
+-- @param deferListeners Keep native handlers suspended until this Who event finishes.
+local function EndRouting(deferListeners)
     if not routing then
         return
     end
     routing = false
     SetRouting(preferredRouting == true)
-    for nativeFrame in pairs(suspendedListeners) do
-        nativeFrame:RegisterEvent("WHO_LIST_UPDATE")
+    if deferListeners then
+        if C_Timer and C_Timer.After then
+            C_Timer.After(0, RestoreNativeListeners)
+        else
+            eventFrame:SetScript("OnUpdate", RestoreNativeListeners)
+        end
+    else
+        RestoreNativeListeners()
     end
-    suspendedListeners = {}
 end
 
 -- Cancels the status ticker if one is running.
@@ -643,7 +661,7 @@ local function ReceiveWho()
     pendingContext  = nil
     pendingDebug    = false
     state.awaiting  = false
-    EndRouting()
+    EndRouting(true)
     if not NS.context or context ~= NS.context.key then
         if reportDebug then
             NS:Print("Who response: discarded because the character context changed; size unavailable.")

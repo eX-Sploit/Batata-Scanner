@@ -2,11 +2,11 @@
 
 The `Batata_Scanner` global exposes API version **1**. Call functions using dot syntax: `Batata_Scanner.GetCensus()`. Runtime modules, observation ingestion, settings, scan controls, and database tables are private implementation details. There are no public database mutation methods.
 
-Every returned data structure is a fresh copy, including census maps/context. Changing a result cannot change stored data. The facade rejects ordinary assignment and hides its metatable. This is an integration contract, not security isolation: WoW addons share Lua globals and SavedVariables.
+Every returned data structure is a fresh copy, including census maps/context. Player cursor tokens are opaque identities with no data fields; their internal state is never returned. Changing a result cannot change stored data. The facade rejects ordinary assignment and hides its metatable. This is an integration contract, not security isolation: WoW addons share Lua globals and SavedVariables.
 
 ## Loading and readiness
 
-Use `## Dependencies: Batata Scanner` in a consumer's TOC when required, or `## OptionalDeps: Batata Scanner` and handle its absence. A loaded API can exist before character context is ready. Check `IsReady()` before data reads; `GetPlayer`, `FindPlayers`, `CountPlayers`, and `GetCensus` raise an error before readiness.
+Use `## Dependencies: Batata Scanner` in a consumer's TOC when required, or `## OptionalDeps: Batata Scanner` and handle its absence. A loaded API can exist before character context is ready. Check `IsReady()` before data reads; `GetPlayer`, `FindPlayers`, cursor opening/advancement, `CountPlayers`, and `GetCensus` raise an error before readiness.
 
 | Function | Result |
 |---|---|
@@ -16,6 +16,10 @@ Use `## Dependencies: Batata Scanner` in a consumer's TOC when required, or `## 
 | `GetContext()` | Copy of the current character's `{ faction, key }`, or nil before context is ready |
 | `GetPlayer(name)` | Copy of one player or nil if no matching record |
 | `FindPlayers(filters?, options?)` | Paginated copy of matching records and result metadata |
+| `OpenPlayerCursor(filters?, options?)` | Opaque exhaustive snapshot/change-feed token |
+| `AdvancePlayerCursor(cursor, budgetMilliseconds?)` | Bounded detached snapshot page, changes, and progress metadata |
+| `ReadPlayerChanges(cursor, budgetMilliseconds?)` | Bounded changes, also available during initial enumeration |
+| `ClosePlayerCursor(cursor)` | Releases read resources; false if already closed or unknown |
 | `CountPlayers(filters?)` | Number of matching stored records |
 | `GetCensus(filters?)` | Detached aggregate for matching records |
 | `GetScanStatus()` | Detached scanner status; `state = "initializing"` before ready |
@@ -82,6 +86,81 @@ for playerIndex, player in ipairs(page.players) do
     print(player.name, player.level)
 end
 ```
+
+## Bounded retrieval and continuous updates
+
+The cursor functions were added in release 1.1.0 without changing API version 1. Feature-detect `OpenPlayerCursor` before using them. `FindPlayers` remains synchronous and compatible; its `limit` bounds copied results, not execution time. Consumers experiencing synchronous query stalls must adopt the cursor path.
+
+Open one long-lived cursor with the same filters and options as `FindPlayers`. Opening does no population traversal, sorting, or copying. The cursor captures the current revision and a session-local change position atomically. Its initial snapshot includes exactly those matching records/values at creation, in the documented order, starting at `offset`. `limit` bounds each returned array, not the complete result set: there is no browser-style 1,000-record cap. The browser retains its own cap.
+
+Advance once per scheduled slice. Preparation, comparison/merge sorting, filtering, page copying, and change replay share one deadline. `budgetMilliseconds` defaults to 1 and accepts any positive finite number through 2, including fractions. Work stops at record/comparison/state boundaries, with a small allowance reserved for completion/publication. Creation, completion, and closure do not materialize a full result array. Every call returns at most `limit` snapshot records and `limit` changes, and results may contain fewer than `limit` even when more remain.
+
+The target is at most 2 ms plus a measured indivisible operation, subject to actual client clock, allocation/GC, and scheduling behavior. This is cooperative work, not a hard real-time guarantee. A readable, monotonic `debugprofilestop` supplies the millisecond deadline. Without it, or if it fails/resets, advancement falls back to at most 64 work operations plus constant publication work and reports `timed = false`; it cannot establish a millisecond bound in that mode. Even with a clock there is a 4,000-operation cap. No coroutine support is required. Consumers must also budget their own imports and combined cursor calls within their frame scheduler.
+
+`AdvancePlayerCursor` prepares the fixed snapshot, emits detached pages, then follows its change journal. Mutations never restart the snapshot. `ReadPlayerChanges` independently drains that same journal position, including while snapshot preparation is running, so fresh discoveries/updates need not wait for initial sorting. Calls on the same cursor share a feed position and never replay an already-read entry. Different cursors have independent positions.
+
+An advancement returns these fields:
+
+| Field | Meaning |
+|---|---|
+| `players` | Detached initial-snapshot page; empty during preparation and for `ReadPlayerChanges` |
+| `changes` | Detached ordered transition entries, described below |
+| `state` | `"preparing"`, `"snapshot"`, `"changes"`, or `"resetRequired"` |
+| `total` | Exact full snapshot match count once preparation finishes; nil before then |
+| `offset`, `limit` | Snapshot offset before this advancement and the configured array-size bound |
+| `revision` | Fixed initial-snapshot revision; never relabeled with a newer live revision |
+| `snapshotSequence` | Fixed initial boundary; use as the version of every snapshot record |
+| `snapshotComplete`, `hasMore` | Whether all requested snapshot rows were delivered, and whether snapshot work remains |
+| `sequence` | Last examined feed position, including changes irrelevant to these filters |
+| `throughSequence`, `throughRevision` | Fixed endpoint of the current feed pass |
+| `caughtUp` | Feed reached that endpoint; does not imply initial snapshot completion or a permanent live endpoint |
+| `timed`, `elapsedMs`, `maxOperationMs`, `workUnits` | Per-call profiling and work diagnostics; timing fields are nil when untimed |
+| `reason` | `"historyExpired"` or `"collectionReloaded"` when reset is required |
+
+A feed pass captures a finite endpoint. Writes arriving during the pass belong to a subsequent pass, so sustained writes do not move the completion boundary indefinitely. Complete initial synchronization requires `snapshotComplete` and a caught-up feed; retain the cursor and continue draining later passes for freshness. Callback coalescing does not coalesce journal entries: each stored record change is sequenced, including equal-timestamp edits and each retention deletion. No-op observations do not create changes.
+
+An entry is `{ kind, name, player?, sequence, revision }`. `kind = "upsert"` carries a detached complete player record that matches the fixed filters. `kind = "remove"` carries no player and removes an identity that was deleted or changed out of the filters. Changes irrelevant both before and after are examined but not returned. Ordering is by change sequence rather than the snapshot sort. Guild unknown/named/confirmed-unguilded and inclusive timestamp matching retain their ordinary meanings. Filters stay fixed for a cursor's lifetime; reopen to change a rolling timestamp window.
+
+When draining changes before snapshot completion, keep a per-identity applied sequence, including removals. Apply a snapshot row only if its `snapshotSequence` is newer than that identity's applied sequence; apply each change with its own `sequence`. This prevents a late old snapshot row from overwriting fresh state or resurrecting a removed record. Use the full name's case-folded identity. Sequence values belong to the current client session and are not persisted resume tokens or Unix timestamps. Do not advance a timestamp watermark to snapshot completion time; cursor sequencing closes the gap without that assumption.
+
+At most eight cursor tokens may remain open. Close them when a consumer stops; closure changes no observations, settings, or scan controls. Active readers share a ring retaining the latest 16,384 transitions (including other factions). Normal observation ingestion has no journal allocation or cursor copy-on-write cost when no public reader is active. Initial snapshots retain old record versions while needed; keep one cursor per consumer and release unused ones promptly.
+
+If a reader falls behind the retained history, it enters `resetRequired` instead of claiming successful completion. Discard that call's payload, close the token, and start a new incremental full snapshot with the same filters. Reconcile the consumer's existing state incrementally, including identities absent from the replacement snapshot; never merge a new snapshot into an old cache without removing missing identities. Keep the new snapshot generation's sequence tracking separate. Recovery restores current stored state; overwritten intermediate historical transitions cannot be reconstructed. A permanently stalled consumer cannot be guaranteed lossless replay with bounded memory. Size/rate stress and recovery must be validated for the intended workload. Reload invalidates all tokens; no feed data is persisted and no SavedVariables migration/reset is required.
+
+```lua
+local provider = Batata_Scanner
+local cursor
+if provider and provider.IsReady() and provider.OpenPlayerCursor then
+    cursor = provider.OpenPlayerCursor(
+        { faction = provider.GetContext().faction },
+        { sort = "name", limit = 100 }
+    )
+end
+
+-- Call from the consumer scheduler; import the returned batch in bounded slices.
+local function ReadSlice()
+    if cursor then
+        return provider.AdvancePlayerCursor(cursor, 0.5)
+    end
+end
+
+-- Schedule separately during initial loading to keep new discoveries fresh.
+local function ReadFreshSlice()
+    if cursor then
+        return provider.ReadPlayerChanges(cursor, 0.5)
+    end
+end
+
+-- Call on shutdown or before opening a replacement after resetRequired.
+local function StopReading()
+    if cursor then
+        provider.ClosePlayerCursor(cursor)
+        cursor = nil
+    end
+end
+```
+
+The example illustrates call ownership, not a scheduler implementation. Import work and recovery reconciliation also need bounded slices. See [the synthetic profiling script](../tests/benchmark_player_read.py) and [cursor tests](../tests/test_player_read.py); neither substitutes for named-build live consumer captures with collection and discovery enabled.
 
 ## Census summaries
 

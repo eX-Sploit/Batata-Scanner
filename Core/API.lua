@@ -48,6 +48,29 @@ function methods.FindPlayers(filters, options)
     return NS.Store:FindPlayers(filters, options)
 end
 
+-- Opens an exhaustive, stable snapshot with an attached sequenced change feed.
+function methods.OpenPlayerCursor(filters, options)
+    RequireReady()
+    return NS.PlayerRead:Open(filters, options)
+end
+
+-- Advances snapshot preparation, bounded page copies, and then change replay within one budget.
+function methods.AdvancePlayerCursor(cursor, budgetMilliseconds)
+    RequireReady()
+    return NS.PlayerRead:Advance(cursor, budgetMilliseconds)
+end
+
+-- Reads bounded changes independently, including while the initial snapshot is preparing.
+function methods.ReadPlayerChanges(cursor, budgetMilliseconds)
+    RequireReady()
+    return NS.PlayerRead:Advance(cursor, budgetMilliseconds, true)
+end
+
+-- Releases read resources without changing observations or collection state.
+function methods.ClosePlayerCursor(cursor)
+    return NS.PlayerRead:Close(cursor)
+end
+
 -- Counts matching stored players; filters optionally restrict the count by player fields.
 function methods.CountPlayers(filters)
     RequireReady()

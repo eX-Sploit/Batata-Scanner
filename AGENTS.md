@@ -1,6 +1,6 @@
 # Batata Scanner contributor guidance
 
-Batata Scanner is a standalone Lua addon for WoW Forever. Its manifest targets Interface **16001**. The `_classic_beta_` directory does not establish Classic Era API compatibility. Migrated source evidence is pinned to **1.60.1 (70374)**, collected **2026-10-14**; verify current runtime behavior separately.
+Batata Scanner is a standalone Lua addon for WoW Forever. Its manifest targets Interface **16001**. The installed client is **1.60.1.70790**, confirmed from executable and launcher metadata on **2026-11-05**. The `_classic_beta_` directory does not establish Classic Era API compatibility. Current source evidence is pinned to **1.60.1 (70790)**, collected **2026-11-05**; verify current runtime behavior separately. Dated historical findings retain their original source builds.
 
 ## Scope and skills
 

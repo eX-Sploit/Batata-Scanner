@@ -9,7 +9,7 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]  # Repository root used to resolve guidance and manifest paths.
 SKILLS = ("lua", "research", "wow-addon-api", "wow-forever-api-research", "wow-forever-social", "wow-forever-ui", "wow-forever-workflow")  # Canonical contributor skill set.
-PIN = "735496de78ebd30ce816a0637982c556987f258c"  # Immutable source revision required by API evidence tests.
+PIN = "eac30af597e5aaa43a60f6675ef5fdcea100375f"  # Immutable source revision required by API evidence tests.
 
 
 class GuidanceTests(unittest.TestCase):
