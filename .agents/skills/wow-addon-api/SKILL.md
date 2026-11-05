@@ -9,7 +9,7 @@ Use this baseline for all Batata Scanner Lua work, then select the focused UI, s
 
 ## Target and evidence
 
-[Batata Scanner.toc](../../../Batata%20Scanner.toc) targets Interface **16001**. The [API research skill](../wow-forever-api-research/SKILL.md) describes the pinned source **1.60.1 (70374)** at commit `735496de78ebd30ce816a0637982c556987f258c`, collected **2026-10-14**. It establishes declarations and source implementation, not installed-client behavior. The directory name does not establish Classic Era APIs. Record `GetBuildInfo()`, project/game type, locale, and capability when runtime behavior matters.
+[Batata Scanner.toc](../../../Batata%20Scanner.toc) targets Interface **16001**. The [API research skill](../wow-forever-api-research/SKILL.md) describes the pinned source **1.60.1 (70790)** at commit `eac30af597e5aaa43a60f6675ef5fdcea100375f`, collected **2026-11-05**. It establishes declarations and source implementation, not installed-client behavior. The directory name does not establish Classic Era APIs. Record `GetBuildInfo()`, project/game type, locale, and capability when runtime behavior matters.
 
 ## Project conventions
 

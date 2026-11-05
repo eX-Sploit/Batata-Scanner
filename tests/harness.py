@@ -267,7 +267,7 @@ class Harness:
         self.lua.execute(BOOTSTRAP)
         if setup:
             self.lua.execute(setup)
-        modules = modules or ("Core.lua", "Store.lua", "Scanner.lua", "Passive.lua", "API.lua")
+        modules = modules or ("Core.lua", "Store.lua", "PlayerRead.lua", "Scanner.lua", "Passive.lua", "API.lua")
         for filename in modules:
             path = module_paths[filename]
             self.lua.execute('assert(loadstring(...))("Batata Scanner",NS)',

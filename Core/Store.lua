@@ -19,6 +19,11 @@ local players              = {} -- Live player records keyed by lowercase name.
 local summaries            = {} -- Maintained all-faction and per-faction census aggregates.
 local playerKeys           = {} -- Stable lowercase identities used to collect search snapshots.
 local searchSnapshots      = setmetatable({}, { __mode = "k" }) -- Pre-update records retained only for active searches.
+local changeReaders        = setmetatable({}, { __mode = "k" }) -- Public reads keeping change versions immutable.
+local CHANGE_HISTORY_SIZE  = 16384 -- Maximum changes retained while a public reader is active.
+local changeHistory        = {} -- Ring of immutable record transitions, indexed by sequence modulo capacity.
+local changeSequence       = 0 -- Session-local sequence, including each separate retention deletion.
+local readGeneration       = 0 -- Changes whenever the collection is loaded, invalidating old readers.
 
 -- Ordered player fields; positions define the saved row layout and copied record shape.
 local playerFields = {
@@ -193,6 +198,10 @@ function Store:Load(saved)
     summaries        = {}
     playerKeys       = {}
     searchSnapshots  = setmetatable({}, { __mode = "k" })
+    changeReaders    = setmetatable({}, { __mode = "k" })
+    changeHistory    = {}
+    changeSequence   = 0
+    readGeneration   = readGeneration + 1
     for entryKey, entry in pairs(type(saved) == "table" and saved or {}) do
         local player = DecodePlayer(entry)
         if player then
@@ -264,7 +273,7 @@ end
 -- @param key Lowercase player identity used by the search snapshot.
 -- @param player Current record version to preserve.
 local function PreserveSnapshots(key, player)
-    local retained = false
+    local retained = next(changeReaders) ~= nil
     for request, snapshot in pairs(searchSnapshots) do
         retained = true
         if snapshot and not snapshot[key] then
@@ -272,6 +281,22 @@ local function PreserveSnapshots(key, player)
         end
     end
     return retained
+end
+
+-- Retains one immutable transition for public readers; ordinary collection allocates no journal entries.
+-- @param previous Record before the change, or nil for a new identity.
+-- @param player Record after the change, or nil for a retention deletion.
+-- @param revision Database revision containing this transition.
+local function JournalChange(previous, player, revision)
+    changeSequence = changeSequence + 1
+    if next(changeReaders) then
+        changeHistory[changeSequence % CHANGE_HISTORY_SIZE] = {
+            sequence  = changeSequence,
+            previous  = previous,
+            player    = player,
+            revision  = revision,
+        }
+    end
 end
 
 -- Deletes retained players older than the configured cutoff and refreshes aggregates and caches.
@@ -286,6 +311,7 @@ function Store:PruneExpired()
         if player.lastSeen and player.lastSeen < cutoff then
             PreserveSnapshots(playerKey, player)
             UpdateSummaries(player, -1)
+            JournalChange(player, nil, NS.db.revision + 1)
             players[playerKey]  = nil
             removed             = removed + 1
         end
@@ -316,11 +342,12 @@ function Store:Observe(info)
     if not name then
         return false, false
     end
-    local key     = name:lower()
-    local player  = players[key]
-    local isNew   = type(player) ~= "table"
-    local now     = NS.Now()
-    local values  = {
+    local key       = name:lower()
+    local player    = players[key]
+    local previous  = player
+    local isNew     = type(player) ~= "table"
+    local now       = NS.Now()
+    local values    = {
         faction  = NS.context.faction,
         level    = NS.Readable(info.level)
                 and type(info.level) == "number"
@@ -373,6 +400,7 @@ function Store:Observe(info)
     end
     if changed then
         NS.db.revision  = NS.db.revision + 1
+        JournalChange(previous, player, NS.db.revision)
         cachedCensus    = nil
         if isNew then
             cachedOrders  = {}
@@ -622,7 +650,8 @@ end
 -- @param sort Player field used to order matching records.
 -- @param descending Whether results are returned in reverse sort order.
 -- @param filters Optional validated player filters applied before text matching.
-function Store:CreateSearch(text, sort, descending, filters)
+-- @param exhaustive Internal flag disabling the browser result cap for public cursor reads.
+function Store:CreateSearch(text, sort, descending, filters, exhaustive)
     text     = NS.Text(text, true) or ""
     filters  = ValidateFilters(filters)
     if #text > 256 then
@@ -788,16 +817,20 @@ function Store:CreateSearch(text, sort, descending, filters)
         self.complete   = true
         self.cancelled  = true
     end
-    -- Scans up to 200 more players within about 1 ms; returns whether the search is complete.
-    -- @param self Search request whose preparation and matching state advance.
-    function request:Step()
+    -- Scans within a supplied shared budget, or up to 200 players/about 1 ms for the browser.
+    -- @param workBudget Optional private cursor deadline shared with page copying and feed replay.
+    function request:Step(workBudget)
         if self.complete then
             return true
         end
-        local started          = debugprofilestop and debugprofilestop()
+        local started          = not workBudget and debugprofilestop and debugprofilestop()
         local preparationWork  = 0
         while not ordered do
-            if PrepareOrder() then
+            local prepared = PrepareOrder()
+            if workBudget and workBudget:Checkpoint() then
+                return false
+            end
+            if prepared then
                 break
             end
             preparationWork = preparationWork + 1
@@ -805,13 +838,13 @@ function Store:CreateSearch(text, sort, descending, filters)
                 return false
             end
         end
-        local stop                = math.min(self.limit, nextPosition + 199)
+        local stop                = workBudget and self.limit or math.min(self.limit, nextPosition + 199)
         local resultLimitReached  = false
         while nextPosition <= stop do
             local position = descending and (self.limit - nextPosition + 1) or nextPosition
             if MatchesTerms(ordered[position]) then
                 matches[#matches + 1] = ordered[position]
-                if #matches >= MAX_SEARCH_RESULTS and nextPosition < self.limit then
+                if not exhaustive and #matches >= MAX_SEARCH_RESULTS and nextPosition < self.limit then
                     self.truncated      = true
                     resultLimitReached  = true
                 end
@@ -819,6 +852,9 @@ function Store:CreateSearch(text, sort, descending, filters)
             ordered[position]  = nil
             nextPosition       = nextPosition + 1
             if resultLimitReached then
+                break
+            end
+            if workBudget and workBudget:Checkpoint() then
                 break
             end
             if started and debugprofilestop() - started >= 1 then
@@ -843,6 +879,61 @@ function Store:CreateSearch(text, sort, descending, filters)
         return player and NS.CopyPlayer(player) or nil
     end
     return request
+end
+
+-- Opens an exhaustive stable snapshot and atomically registers its change-feed boundary.
+-- @param filters Optional public player filters.
+-- @param options Optional public sort and pagination settings.
+function Store:CreatePlayerRead(filters, options)
+    filters = ValidateFilters(filters)
+    local sort,
+        offset,
+        limit,
+        descending = Options(options)
+    local request = self:CreateSearch("", sort, descending, filters, true)
+    changeReaders[request] = true
+    return request, filters, offset, limit, changeSequence, readGeneration
+end
+
+-- Returns the current session change position and collection generation.
+function Store:GetReadPosition()
+    return changeSequence, readGeneration
+end
+
+-- Returns one detached filtered transition, false for an irrelevant change, or nil on a journal gap.
+-- @param sequence Exact change sequence to fetch.
+-- @param filters Validated filters captured when the read opened.
+function Store:GetReadChange(sequence, filters)
+    local transition = changeHistory[sequence % CHANGE_HISTORY_SIZE]
+    if not transition or transition.sequence ~= sequence then
+        return nil
+    end
+    local player = transition.player
+    local kind
+    if Matches(player, filters) then
+        kind = "upsert"
+    elseif Matches(transition.previous, filters) then
+        kind = "remove"
+    else
+        return false
+    end
+    return {
+        kind      = kind,
+        name      = (player or transition.previous).name,
+        player    = kind == "upsert" and NS.CopyPlayer(player) or nil,
+        sequence  = sequence,
+        revision  = transition.revision,
+    }
+end
+
+-- Releases one public read without changing stored observations or scanner state.
+-- @param request Private search request belonging to the read.
+function Store:ClosePlayerRead(request)
+    changeReaders[request] = nil
+    request:Cancel()
+    if not next(changeReaders) then
+        changeHistory = {}
+    end
 end
 
 -- Returns the number of stored players matching the filters.

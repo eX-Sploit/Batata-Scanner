@@ -23,6 +23,24 @@ Enum.SocialWhoOrigin={Social=1}
 # Most tests begin a sweep explicitly, so they start from a stopped scanner.
 STOPPED_SETUP = SCANNER_SETUP + 'Batata_Scanner_DB={schemaVersion=1,settings={scanBehavior="ordered",queryInterval=5},scanner={state="stopped"}}\n'
 
+# Model the native Who handler that opens its LFG parent when results arrive.
+NATIVE_WHO_POPUP_SETUP = '''
+LFGWhoListFrame:UnregisterEvent("WHO_LIST_UPDATE")
+nativeWhoEvents=0
+LFGParentFrame=CreateFrame("Frame","LFGParentFrame")
+LFGParentFrame:Hide()
+LFGWhoListFrame=CreateFrame("Frame","LFGWhoListFrame")
+LFGWhoListFrame:Hide()
+LFGWhoListFrame:RegisterEvent("WHO_LIST_UPDATE")
+LFGWhoListFrame:SetScript("OnEvent",function(frame,event)
+    if event=="WHO_LIST_UPDATE" then
+        nativeWhoEvents=nativeWhoEvents+1
+        LFGParentFrame:Show()
+    end
+end)
+Emit("ADDON_LOADED","Blizzard_GroupFinder_VanillaStyle")
+'''
+
 # Expected WoW Forever race/class matrix used by query-planning regressions.
 FOREVER_RACES = {
     "Alliance": {
@@ -1145,6 +1163,7 @@ class ScannerTests(unittest.TestCase):
             Deliver({{fullName="Owned",level=5}})
             assert(NS.Scanner:GetStatus().completedQueries==1 and NS.Scanner:GetStatus().remainingQueries==1)
             assert(Batata_Scanner.CountPlayers()==1 and NS.Scanner:GetStatus().cooldown==6)
+            Advance(0)
             assert(LFGWhoListFrame:IsEventRegistered("WHO_LIST_UPDATE") and not whoRouting)
             Advance(6)
             Click(function() assert(not NS.Scanner:Continue()) end)
@@ -1265,6 +1284,7 @@ class ScannerTests(unittest.TestCase):
         self.check("NS.Scanner:GetStatus().awaiting and NS.Scanner:GetStatus().nativeWhoOpen")
         self.harness.execute("Deliver({{fullName='Owned',level=5}})")
         self.check("Batata_Scanner.CountPlayers()==1 and NS.Scanner:GetStatus().completedQueries==1")
+        self.harness.advance(0)
         self.check("LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE') and whoRouting")
         self.harness.advance(6)
         self.harness.click("WorldFrame:GetScript('OnMouseDown')(WorldFrame)")
@@ -1406,10 +1426,70 @@ class ScannerTests(unittest.TestCase):
         self.check("NS.Scanner:GetStatus().paused and NS.Scanner:GetStatus().completedQueries==0")
         self.check("Batata_Scanner.CountPlayers()==0")
 
+    def test_scanner_responses_do_not_open_lfg_in_either_native_load_order(self):
+        """Keep scanner replies out of native handlers, then restore manual Who."""
+        for load_order in ("before_scanner", "after_scanner", "during_query"):
+            with self.subTest(load_order=load_order):
+                setup = STOPPED_SETUP
+                if load_order == "before_scanner":
+                    setup += NATIVE_WHO_POPUP_SETUP
+                self.harness = Harness(setup=setup)
+                if load_order == "after_scanner":
+                    self.harness.execute(NATIVE_WHO_POPUP_SETUP)
+                self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=20}))")
+                if load_order == "during_query":
+                    self.harness.execute(NATIVE_WHO_POPUP_SETUP)
+                self.harness.execute("Deliver({{fullName='Observed',level=5}})")
+                self.check("nativeWhoEvents==0 and not LFGParentFrame:IsShown()")
+                self.check("not LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE')")
+                self.harness.advance(6)
+                self.harness.click("assert(NS.Scanner:Continue())")
+                self.harness.execute("Deliver({})")
+                self.check("nativeWhoEvents==0 and not LFGParentFrame:IsShown()")
+                self.check("NS.Scanner:GetStatus().state=='complete' and Batata_Scanner.CountPlayers()==1")
+                self.harness.advance(0)
+                self.check("LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE') and not whoRouting")
+                self.harness.advance(6)
+                self.harness.click("C_FriendList.SendWho('5-5')")
+                self.harness.execute("Deliver({{fullName='Manual',level=5}})")
+                self.check("nativeWhoEvents==1 and LFGParentFrame:IsShown()")
+                self.check("Batata_Scanner.CountPlayers()==1")
+
+    def test_deferred_native_restore_keeps_a_new_query_suspended(self):
+        """A pending restoration must not release listeners owned by a newer send."""
+        self.harness.execute(NATIVE_WHO_POPUP_SETUP)
+        self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=20}))")
+        self.harness.execute("clock=clock+6; Deliver({})")
+        self.harness.click("assert(NS.Scanner:Continue())")
+        self.harness.advance(0)
+        self.check("NS.Scanner:GetStatus().awaiting and not LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE')")
+        self.harness.execute("Deliver({})")
+        self.check("nativeWhoEvents==0 and not LFGParentFrame:IsShown()")
+        self.harness.advance(0)
+        self.check("LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE')")
+
+    def test_native_restore_defers_without_timer_after(self):
+        """Use a one-shot frame update if deferred timers are unavailable."""
+        self.harness.execute(NATIVE_WHO_POPUP_SETUP + "C_Timer.After=nil")
+        self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=10}))")
+        self.harness.execute("Deliver({})")
+        self.check("nativeWhoEvents==0 and not LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE')")
+        self.harness.execute('''
+            for frameIndex,frame in ipairs(frames) do
+                local onUpdate=frame:GetScript("OnUpdate")
+                if onUpdate then
+                    onUpdate(frame,0)
+                    assert(frame:GetScript("OnUpdate")==nil)
+                end
+            end
+        ''')
+        self.check("LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE') and not LFGParentFrame:IsShown()")
+
     def test_native_routing_changes_during_wait_are_preserved(self):
         """Verifies that native routing changes during wait are preserved."""
         self.harness.click("assert(NS.Scanner:Start({minLevel=1,maxLevel=10}))")
         self.harness.execute("C_FriendList.SetWhoToUi(true); Deliver({})")
+        self.harness.advance(0)
         self.check("whoRouting and LFGWhoListFrame:IsEventRegistered('WHO_LIST_UPDATE')")
 
     def test_newly_loaded_native_who_listener_is_restored(self):
@@ -1418,6 +1498,7 @@ class ScannerTests(unittest.TestCase):
         self.harness.execute("WhoFrame:RegisterEvent('WHO_LIST_UPDATE'); Emit('ADDON_LOADED','Blizzard_Who')")
         self.check("not WhoFrame:IsEventRegistered('WHO_LIST_UPDATE')")
         self.harness.execute("Deliver({})")
+        self.harness.advance(0)
         self.check("WhoFrame:IsEventRegistered('WHO_LIST_UPDATE')")
 
     def test_new_player_count_matches_store_name_case_rules(self):
